@@ -66,6 +66,17 @@ Ultima actualizacion: 2026-08-08
   recuperacion operativa.
 - [x] Se agregaron plantillas endurecidas para el servicio, proxy y respaldo
   diario en `deploy/`.
+- [x] Se corrigio la CSP para activar `upgrade-insecure-requests` solo cuando
+  `HTTPS_ONLY=true`; durante la preparacion por HTTP, CSS y JavaScript ya no se
+  intentan cargar prematuramente mediante HTTPS.
+- [x] Se transformaron las tarjetas de tickets en boletos neón con acabado
+  vectorial CSS: perforaciones laterales, borde punteado, código visual,
+  números iluminados y estados disponibles/comprados diferenciados.
+- [x] Se incrementó la versión de los recursos públicos a `v=5` para que los
+  navegadores no conserven las tarjetas antiguas en caché.
+- [x] Se agregaron las vistas públicas `/1` y `/2`: cada una muestra 53
+  tickets del mismo JSON, sin regenerar ni duplicar pares. La raíz `/` conserva
+  la vista completa de 106 tickets para compatibilidad.
 - [ ] Confirmar el dominio definitivo y ejecutar la instalacion en la instancia.
 - [ ] Guardar respaldos periodicos fuera de la instancia Oracle.
 - [ ] Activar `COOKIE_SECURE=true` y `HTTPS_ONLY=true` cuando HTTPS este listo.

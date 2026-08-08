@@ -113,6 +113,7 @@ export async function createApp({ config, store = new JsonStore(config.dataFile)
         baseUri: ["'self'"],
         formAction: ["'self'"],
         frameAncestors: ["'none'"],
+        upgradeInsecureRequests: config.httpsOnly ? [] : null,
       },
     },
     strictTransportSecurity: config.httpsOnly
@@ -316,7 +317,7 @@ export async function createApp({ config, store = new JsonStore(config.dataFile)
     maxAge: '1h',
   }));
 
-  app.get('/', (request, response) => {
+  app.get(['/', '/1', '/1/', '/2', '/2/'], (request, response) => {
     response.setHeader('Cache-Control', 'no-cache');
     response.sendFile(join(config.publicDir, 'index.html'));
   });

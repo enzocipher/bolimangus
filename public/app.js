@@ -16,13 +16,30 @@ const elements = {
   empty: document.querySelector('#ticket-empty'),
   contacts: document.querySelector('#contact-links'),
   error: document.querySelector('#page-error'),
+  pageTicketLabel: document.querySelector('#page-ticket-label'),
 };
+
+const pageMatch = window.location.pathname.match(/^\/(1|2)\/?$/);
+const ticketPage = pageMatch ? Number(pageMatch[1]) : null;
+const ticketsPerPage = 53;
 
 const state = {
   data: null,
   query: '',
   filter: 'all',
 };
+
+function visibleTickets() {
+  if (!ticketPage) return state.data.tickets;
+  const start = (ticketPage - 1) * ticketsPerPage;
+  return state.data.tickets.slice(start, start + ticketsPerPage);
+}
+
+document.querySelectorAll('[data-ticket-page]').forEach((link) => {
+  const requestedPage = link.dataset.ticketPage === 'all' ? null : Number(link.dataset.ticketPage);
+  if (requestedPage === ticketPage) link.setAttribute('aria-current', 'page');
+  if (!requestedPage && !ticketPage) link.setAttribute('aria-current', 'page');
+});
 
 function textElement(tag, className, text) {
   const element = document.createElement(tag);
@@ -36,10 +53,11 @@ function formatPair(ticket) {
 }
 
 function renderStats() {
-  const sold = state.data.tickets.filter((ticket) => ticket.buyer).length;
-  elements.total.textContent = String(state.data.tickets.length);
+  const tickets = visibleTickets();
+  const sold = tickets.filter((ticket) => ticket.buyer).length;
+  elements.total.textContent = String(tickets.length);
   elements.sold.textContent = String(sold);
-  elements.available.textContent = String(state.data.tickets.length - sold);
+  elements.available.textContent = String(tickets.length - sold);
 }
 
 function renderPrizes() {
@@ -98,7 +116,7 @@ function matchesTicket(ticket) {
 }
 
 function renderTickets() {
-  const matches = state.data.tickets.filter(matchesTicket);
+  const matches = visibleTickets().filter(matchesTicket);
   elements.tickets.replaceChildren();
 
   for (const ticket of matches) {
@@ -174,7 +192,10 @@ function renderContacts() {
 
 function renderRaffle() {
   const raffle = state.data.raffle;
-  document.title = raffle.title;
+  document.title = ticketPage ? `${raffle.title} · Página ${ticketPage}` : raffle.title;
+  elements.pageTicketLabel.textContent = ticketPage
+    ? `Sorteo activo · Página ${ticketPage} · ${ticketsPerPage} tickets`
+    : 'Sorteo activo · 106 oportunidades';
   elements.title.textContent = raffle.title;
   elements.subtitle.textContent = raffle.subtitle || 'Dos números, una oportunidad para ganar.';
   elements.description.textContent = raffle.description;

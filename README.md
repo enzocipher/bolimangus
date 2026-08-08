@@ -40,6 +40,10 @@ publicarlos. No existe pasarela de pagos ni base de datos.
    La página queda en `http://127.0.0.1:3000` y el panel en
    `http://127.0.0.1:3000/admin`.
 
+   La página pública completa está en `/`. Para mostrar los tickets en dos
+   vistas más ligeras también están disponibles `/1` (tickets 1–53) y `/2`
+   (tickets 54–106); ambas usan el mismo archivo JSON y no regeneran pares.
+
 ## Datos y respaldos
 
 - `data/rifa.json` se crea únicamente si no existe.

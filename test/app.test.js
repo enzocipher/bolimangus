@@ -126,13 +126,19 @@ describe('API de la rifa', () => {
   });
 
   it('sirve la pagina publica y el panel con encabezados de seguridad', async () => {
-    const [home, admin] = await Promise.all([
+    const [home, firstPage, secondPage, admin] = await Promise.all([
       fetch(`${baseUrl}/`),
+      fetch(`${baseUrl}/1`),
+      fetch(`${baseUrl}/2/`),
       fetch(`${baseUrl}/admin`),
     ]);
     assert.equal(home.status, 200);
+    assert.equal(firstPage.status, 200);
+    assert.equal(secondPage.status, 200);
     assert.equal(admin.status, 200);
-    assert.match(home.headers.get('content-security-policy'), /default-src 'self'/);
+    const contentSecurityPolicy = home.headers.get('content-security-policy');
+    assert.match(contentSecurityPolicy, /default-src 'self'/);
+    assert.doesNotMatch(contentSecurityPolicy, /upgrade-insecure-requests/);
     assert.equal(home.headers.get('x-content-type-options'), 'nosniff');
     assert.match(await home.text(), /Tickets y participantes/);
     assert.match(await admin.text(), /Administración/);
