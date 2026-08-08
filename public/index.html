@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Consulta los 106 tickets de la rifa, conoce los premios y revisa los participantes.">
+    <meta name="theme-color" content="#0b1020">
+    <title>Gran Rifa Especial</title>
+    <link rel="stylesheet" href="/styles.css?v=4">
+    <script src="/app.js?v=4" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#contenido">Saltar al contenido</a>
+
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="Inicio de la rifa">
+        <span class="brand-mark" aria-hidden="true">53</span>
+        <span>Rifa especial</span>
+      </a>
+      <nav aria-label="Navegación principal">
+        <a href="#como-participar">Cómo participar</a>
+        <a href="#premios">Premios</a>
+        <a href="#tickets">Tickets</a>
+        <a href="#contacto">Contacto</a>
+      </nav>
+    </header>
+
+    <main id="contenido">
+      <section class="hero" aria-labelledby="raffle-title">
+        <div class="hero-copy">
+          <div class="hero-kicker"><span class="live-dot" aria-hidden="true"></span> Sorteo activo · 106 oportunidades</div>
+          <h1 id="raffle-title">Gran Rifa Especial</h1>
+          <p class="hero-subtitle" id="raffle-subtitle">Elige un ticket y participa.</p>
+          <p class="hero-description" id="raffle-description">Cargando información de la rifa…</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#tickets">Explorar tickets <span aria-hidden="true">↗</span></a>
+            <a class="button button-secondary" id="hero-contact" href="#contacto">Quiero participar</a>
+          </div>
+          <dl class="raffle-facts">
+            <div><dt>Sorteo</dt><dd id="raffle-date">Por confirmar</dd></div>
+            <div><dt>Valor del ticket</dt><dd id="raffle-price">Por confirmar</dd></div>
+          </dl>
+        </div>
+
+        <div class="hero-visual" aria-label="Vista previa de un ticket con dos números">
+          <div class="orbit orbit-one" aria-hidden="true"></div>
+          <div class="orbit orbit-two" aria-hidden="true"></div>
+          <div class="hero-ticket">
+            <div class="ticket-topline"><span>RIFA · EDICIÓN</span><span>№ 001</span></div>
+            <p>Tu ticket contiene</p>
+            <div class="sample-pair" aria-hidden="true"><span>24</span><b>—</b><span>24</span></div>
+            <strong>este par identifica tu ticket</strong>
+            <small>Cada ticket completo es diferente a todos los demás.</small>
+            <div class="ticket-barcode" aria-hidden="true"></div>
+          </div>
+          <span class="float-label label-top">2 números</span>
+          <span class="float-label label-bottom">1 oportunidad</span>
+        </div>
+      </section>
+
+      <section class="stats-bar" aria-label="Estado de la rifa">
+        <div><strong id="stat-total">106</strong><span>Tickets totales</span></div>
+        <div><strong id="stat-available">—</strong><span>Disponibles</span></div>
+        <div><strong id="stat-sold">—</strong><span>Comprados</span></div>
+      </section>
+
+      <section class="section participation-section" id="como-participar" aria-labelledby="participation-title">
+        <div class="section-heading participation-heading">
+          <div>
+            <p class="eyebrow">Participar es sencillo</p>
+            <h2 id="participation-title">Elige, escríbenos y confirma</h2>
+          </div>
+          <p>No necesitas registrarte ni ingresar datos de pago en esta página.</p>
+        </div>
+        <ol class="participation-steps">
+          <li>
+            <span class="step-number" aria-hidden="true">01</span>
+            <div><h3>Busca tu ticket</h3><p>Revisa los pares disponibles y escoge el que prefieras.</p></div>
+          </li>
+          <li>
+            <span class="step-number" aria-hidden="true">02</span>
+            <div><h3>Habla con nosotros</h3><p>Usa los datos de contacto publicados por la organización.</p></div>
+          </li>
+          <li>
+            <span class="step-number" aria-hidden="true">03</span>
+            <div><h3>Comprueba tu nombre</h3><p>Cuando se confirme, aparecerás junto a tu ticket en la lista pública.</p></div>
+          </li>
+        </ol>
+      </section>
+
+      <section class="section" id="premios" aria-labelledby="prizes-title">
+        <div class="section-heading">
+          <div><p class="eyebrow">01 · Lo que puedes ganar</p><h2 id="prizes-title">Premios de la rifa</h2></div>
+          <p>Las imágenes y los detalles definitivos se publicarán aquí.</p>
+        </div>
+        <div class="prize-grid" id="prize-grid" aria-live="polite"></div>
+      </section>
+
+      <section class="section tickets-section" id="tickets" aria-labelledby="tickets-title">
+        <div class="section-heading">
+          <div><p class="eyebrow">02 · Elige tu oportunidad</p><h2 id="tickets-title">Tickets y participantes</h2></div>
+          <p>Cada tarjeta representa un ticket. El orden de los dos números sí importa.</p>
+        </div>
+        <div class="ticket-toolbar" role="search">
+          <label class="search-field" for="ticket-search">
+            <span>Buscar ticket, par o participante</span>
+            <input id="ticket-search" type="search" placeholder="23-25, T001 o un nombre" autocomplete="off">
+          </label>
+          <fieldset class="filter-group">
+            <legend>Mostrar</legend>
+            <label><input type="radio" name="ticket-filter" value="all" checked> Todos</label>
+            <label><input type="radio" name="ticket-filter" value="available"> Disponibles</label>
+            <label><input type="radio" name="ticket-filter" value="sold"> Comprados</label>
+          </fieldset>
+        </div>
+        <p class="results-summary" id="results-summary" aria-live="polite">Cargando tickets…</p>
+        <div class="ticket-grid" id="ticket-grid"></div>
+        <div class="empty-state" id="ticket-empty" hidden><strong>No encontramos coincidencias</strong><p>Prueba con otro número, identificador o nombre.</p></div>
+      </section>
+
+      <section class="contact-panel" id="contacto" aria-labelledby="contact-title">
+        <div><p class="eyebrow">03 · Contacto directo</p><h2 id="contact-title">¿Quieres separar un ticket?</h2><p>Comunícate con la organización. Esta página no solicita ni procesa pagos.</p></div>
+        <div class="contact-links" id="contact-links"><span class="contact-placeholder">Los datos de contacto se publicarán próximamente.</span></div>
+      </section>
+
+      <section class="terms section" aria-labelledby="terms-title">
+        <details><summary id="terms-title">Condiciones e información del sorteo <span aria-hidden="true">＋</span></summary><p id="raffle-terms">La información definitiva se publicará próximamente.</p></details>
+      </section>
+
+      <div class="page-error" id="page-error" role="alert" hidden>No pudimos cargar la información. Intenta actualizar la página.</div>
+    </main>
+
+    <footer class="site-footer"><p><strong>Rifa especial</strong> · Información administrada directamente por la organización.</p><a href="/admin" rel="nofollow">Administración <span aria-hidden="true">↗</span></a></footer>
+    <noscript><p class="noscript-message">Activa JavaScript para consultar el estado actualizado de los tickets.</p></noscript>
+  </body>
+</html>

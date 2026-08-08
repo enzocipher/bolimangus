@@ -1,0 +1,11 @@
+node_modules/
+.env
+data/rifa.json
+data/rifa.backup.json
+data/*.tmp
+data/temp-uploads/
+public/uploads/*
+!public/uploads/.gitkeep
+pnpm-debug.log*
+coverage/
+.DS_Store

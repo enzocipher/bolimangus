@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#121d31">
+    <title>Administración · Rifa</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/admin/admin.css">
+    <script src="/admin/admin.js" defer></script>
+  </head>
+  <body class="admin-body">
+    <a class="skip-link" href="#admin-main">Saltar al contenido</a>
+
+    <main id="admin-main">
+      <section class="login-shell" id="login-view" aria-labelledby="login-title">
+        <div class="login-card">
+          <a class="brand" href="/">
+            <span class="brand-mark" aria-hidden="true">R</span>
+            <span>Volver a la rifa</span>
+          </a>
+          <p class="eyebrow">Panel privado</p>
+          <h1 id="login-title">Administración</h1>
+          <p>Ingresa la contraseña configurada en el servidor.</p>
+          <form id="login-form">
+            <label class="admin-field" for="admin-password">
+              <span>Contraseña</span>
+              <input id="admin-password" name="password" type="password" autocomplete="current-password" required maxlength="256">
+            </label>
+            <button class="button button-primary" type="submit">Ingresar</button>
+          </form>
+          <p class="form-message" id="login-message" role="alert"></p>
+        </div>
+      </section>
+
+      <div class="admin-app" id="dashboard-view" hidden>
+        <header class="admin-header">
+          <a class="brand" href="/">
+            <span class="brand-mark" aria-hidden="true">R</span>
+            <span>Rifa especial</span>
+          </a>
+          <div class="admin-header-actions">
+            <a class="button button-secondary button-small" href="/" target="_blank" rel="noopener">Ver página pública</a>
+            <button class="button button-quiet button-small" id="logout-button" type="button">Cerrar sesión</button>
+          </div>
+        </header>
+
+        <div class="admin-layout">
+          <aside class="admin-sidebar" aria-label="Secciones del panel">
+            <p class="eyebrow">Administración</p>
+            <nav>
+              <a href="#resumen">Resumen</a>
+              <a href="#informacion">Información</a>
+              <a href="#premios-admin">Premios</a>
+              <a href="#tickets-admin">Tickets</a>
+            </nav>
+            <p class="sidebar-note">Los pares de números están protegidos y no pueden editarse desde este panel.</p>
+          </aside>
+
+          <div class="admin-content">
+            <section class="admin-section" id="resumen" aria-labelledby="summary-title">
+              <div class="admin-section-heading">
+                <div>
+                  <p class="eyebrow">Estado actual</p>
+                  <h1 id="summary-title">Resumen</h1>
+                </div>
+                <button class="button button-secondary button-small" id="refresh-button" type="button">Actualizar datos</button>
+              </div>
+              <div class="admin-stats">
+                <article><span>Tickets totales</span><strong id="admin-total">106</strong></article>
+                <article><span>Comprados</span><strong id="admin-sold">—</strong></article>
+                <article><span>Disponibles</span><strong id="admin-available">—</strong></article>
+                <article><span>Premios</span><strong id="admin-prizes">—</strong></article>
+              </div>
+            </section>
+
+            <section class="admin-section" id="informacion" aria-labelledby="settings-title">
+              <div class="admin-section-heading">
+                <div>
+                  <p class="eyebrow">Contenido público</p>
+                  <h2 id="settings-title">Información de la rifa</h2>
+                </div>
+              </div>
+              <form class="admin-form" id="settings-form">
+                <div class="form-grid form-grid-two">
+                  <label class="admin-field">
+                    <span>Título</span>
+                    <input name="title" required maxlength="80">
+                  </label>
+                  <label class="admin-field">
+                    <span>Subtítulo</span>
+                    <input name="subtitle" maxlength="120">
+                  </label>
+                </div>
+                <label class="admin-field">
+                  <span>Descripción</span>
+                  <textarea name="description" rows="4" maxlength="800"></textarea>
+                </label>
+                <div class="form-grid form-grid-three">
+                  <label class="admin-field">
+                    <span>Fecha o detalle del sorteo</span>
+                    <input name="drawDate" maxlength="80">
+                  </label>
+                  <label class="admin-field">
+                    <span>Precio del ticket</span>
+                    <input name="ticketPrice" maxlength="40">
+                  </label>
+                  <label class="admin-field">
+                    <span>Moneda</span>
+                    <input name="currency" maxlength="10" placeholder="S/">
+                  </label>
+                </div>
+                <fieldset class="admin-fieldset">
+                  <legend>Contacto público</legend>
+                  <div class="form-grid form-grid-two">
+                    <label class="admin-field">
+                      <span>WhatsApp, con código de país</span>
+                      <input name="whatsapp" type="tel" maxlength="30" placeholder="51999999999">
+                    </label>
+                    <label class="admin-field">
+                      <span>Teléfono</span>
+                      <input name="phone" type="tel" maxlength="30">
+                    </label>
+                    <label class="admin-field">
+                      <span>Correo</span>
+                      <input name="email" type="email" maxlength="120">
+                    </label>
+                    <label class="admin-field">
+                      <span>Instagram</span>
+                      <input name="instagram" maxlength="120" placeholder="@usuario">
+                    </label>
+                  </div>
+                </fieldset>
+                <label class="admin-field">
+                  <span>Condiciones</span>
+                  <textarea name="terms" rows="5" maxlength="1500"></textarea>
+                </label>
+                <div class="form-actions">
+                  <button class="button button-primary" type="submit">Guardar información</button>
+                </div>
+              </form>
+            </section>
+
+            <section class="admin-section" id="premios-admin" aria-labelledby="admin-prizes-title">
+              <div class="admin-section-heading">
+                <div>
+                  <p class="eyebrow">Galería pública</p>
+                  <h2 id="admin-prizes-title">Premios</h2>
+                </div>
+              </div>
+              <form class="admin-form compact-form" id="new-prize-form" enctype="multipart/form-data">
+                <h3>Agregar un premio</h3>
+                <div class="form-grid form-grid-two">
+                  <label class="admin-field">
+                    <span>Nombre</span>
+                    <input name="name" required maxlength="100">
+                  </label>
+                  <label class="admin-field">
+                    <span>Imagen opcional</span>
+                    <input name="image" type="file" accept="image/png,image/jpeg,image/webp">
+                    <small>PNG, JPEG o WebP; máximo 5 MB.</small>
+                  </label>
+                </div>
+                <label class="admin-field">
+                  <span>Descripción</span>
+                  <textarea name="description" rows="3" maxlength="500"></textarea>
+                </label>
+                <button class="button button-primary" type="submit">Agregar premio</button>
+              </form>
+              <div class="admin-prize-list" id="admin-prize-list"></div>
+            </section>
+
+            <section class="admin-section" id="tickets-admin" aria-labelledby="admin-tickets-title">
+              <div class="admin-section-heading">
+                <div>
+                  <p class="eyebrow">106 pares protegidos</p>
+                  <h2 id="admin-tickets-title">Tickets y compradores</h2>
+                </div>
+              </div>
+              <div class="admin-ticket-toolbar">
+                <label class="admin-field" for="admin-ticket-search">
+                  <span>Buscar</span>
+                  <input id="admin-ticket-search" type="search" placeholder="T001, 23-25, nombre o teléfono">
+                </label>
+                <label class="admin-field" for="admin-ticket-filter">
+                  <span>Estado</span>
+                  <select id="admin-ticket-filter">
+                    <option value="all">Todos</option>
+                    <option value="available">Disponibles</option>
+                    <option value="sold">Comprados</option>
+                  </select>
+                </label>
+              </div>
+              <p class="results-summary" id="admin-ticket-summary" aria-live="polite"></p>
+              <div class="admin-ticket-list" id="admin-ticket-list"></div>
+            </section>
+          </div>
+        </div>
+      </div>
+
+      <div class="toast" id="admin-toast" role="status" aria-live="polite" hidden></div>
+    </main>
+
+    <dialog class="admin-dialog" id="ticket-dialog" aria-labelledby="ticket-dialog-title">
+      <form method="dialog" class="dialog-close-form">
+        <button type="submit" class="icon-button" aria-label="Cerrar">×</button>
+      </form>
+      <p class="eyebrow">Asignar participante</p>
+      <h2 id="ticket-dialog-title">Editar ticket</h2>
+      <p class="dialog-pair" id="ticket-dialog-pair"></p>
+      <form class="admin-form" id="ticket-form">
+        <input name="ticketId" type="hidden">
+        <label class="admin-field">
+          <span>Nombre público del comprador</span>
+          <input name="name" required maxlength="100" autocomplete="name">
+        </label>
+        <label class="admin-field">
+          <span>Teléfono privado</span>
+          <input name="phone" type="tel" maxlength="40" autocomplete="tel">
+        </label>
+        <label class="admin-field">
+          <span>Notas privadas</span>
+          <textarea name="notes" rows="4" maxlength="500"></textarea>
+        </label>
+        <div class="form-actions form-actions-between">
+          <button class="button button-danger" id="release-ticket-button" type="button">Dejar disponible</button>
+          <button class="button button-primary" type="submit">Guardar comprador</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog class="admin-dialog" id="prize-dialog" aria-labelledby="prize-dialog-title">
+      <form method="dialog" class="dialog-close-form">
+        <button type="submit" class="icon-button" aria-label="Cerrar">×</button>
+      </form>
+      <p class="eyebrow">Galería pública</p>
+      <h2 id="prize-dialog-title">Editar premio</h2>
+      <form class="admin-form" id="prize-form" enctype="multipart/form-data">
+        <input name="prizeId" type="hidden">
+        <label class="admin-field">
+          <span>Nombre</span>
+          <input name="name" required maxlength="100">
+        </label>
+        <label class="admin-field">
+          <span>Descripción</span>
+          <textarea name="description" rows="4" maxlength="500"></textarea>
+        </label>
+        <label class="admin-field">
+          <span>Nueva imagen opcional</span>
+          <input name="image" type="file" accept="image/png,image/jpeg,image/webp">
+          <small>Si no eliges un archivo se conservará la imagen actual.</small>
+        </label>
+        <div class="form-actions">
+          <button class="button button-primary" type="submit">Guardar premio</button>
+        </div>
+      </form>
+    </dialog>
+  </body>
+</html>
