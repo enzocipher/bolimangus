@@ -139,12 +139,15 @@ function renderTickets() {
       textElement('strong', '', String(ticket.second)),
     );
 
+    const ornament = textElement('span', 'ticket-ornament', '');
+    ornament.setAttribute('aria-hidden', 'true');
+
     const owner = textElement(
       'p',
       'ticket-owner',
       ticket.buyer ? ticket.buyer.name : 'Aún sin participante',
     );
-    article.append(header, pair, owner);
+    article.append(header, ornament, pair, owner);
     elements.tickets.append(article);
   }
 

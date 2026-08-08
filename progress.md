@@ -69,13 +69,10 @@ Ultima actualizacion: 2026-08-08
 - [x] Se corrigio la CSP para activar `upgrade-insecure-requests` solo cuando
   `HTTPS_ONLY=true`; durante la preparacion por HTTP, CSS y JavaScript ya no se
   intentan cargar prematuramente mediante HTTPS.
-- [x] Se transformaron las tarjetas de tickets en boletos neón con acabado
-  vectorial CSS: perforaciones laterales, borde punteado, código visual,
-  números iluminados y estados disponibles/comprados diferenciados.
-- [x] Se ajustó el boleto visual para seguir la referencia solicitada: formato
-  horizontal rosa/coral, talón izquierdo, perforaciones repetidas, separador
-  punteado y texto central `TICKET`.
-- [x] Se incrementó la versión de los recursos públicos a `v=5` para que los
+- [x] Se rediseñaron las tarjetas como boletos clásicos dorados dibujados con
+  CSS: perforaciones laterales, esquinas recortadas, marco ornamental,
+  estrellas, datos verticales y el par real de números como elemento central.
+- [x] Se incrementó la versión de los recursos públicos a `v=7` para que los
   navegadores no conserven las tarjetas antiguas en caché.
 - [x] Se agregaron las vistas públicas `/1` y `/2`: cada una muestra 53
   tickets del mismo JSON, sin regenerar ni duplicar pares. La raíz `/` conserva
