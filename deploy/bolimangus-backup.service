@@ -1,0 +1,15 @@
+[Unit]
+Description=Respaldo local de Bolimangus
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/backup-bolimangus
+User=root
+Group=root
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadOnlyPaths=/var/lib/bolimangus
+ReadWritePaths=/var/backups/bolimangus

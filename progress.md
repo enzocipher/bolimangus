@@ -60,9 +60,14 @@ Ultima actualizacion: 2026-08-08
 
 - [ ] Reemplazar textos, contacto e imagenes provisionales desde `/admin`.
 - [ ] Generar los secretos definitivos con `pnpm create-secrets` en el servidor.
-- [ ] Confirmar el sistema operativo de la instancia Oracle y el dominio.
-- [ ] Preparar e instalar el servicio `systemd`, el proxy HTTPS y los respaldos
-  externos segun esos datos.
+- [x] Se confirmo Ubuntu como sistema de la instancia Oracle.
+- [x] Se preparo `DEPLOY_UBUNTU.md` con `git clone`, Node.js LTS verificado,
+  permisos, UFW/OCI, `systemd`, Nginx, Certbot, HTTPS, actualizaciones y
+  recuperacion operativa.
+- [x] Se agregaron plantillas endurecidas para el servicio, proxy y respaldo
+  diario en `deploy/`.
+- [ ] Confirmar el dominio definitivo y ejecutar la instalacion en la instancia.
+- [ ] Guardar respaldos periodicos fuera de la instancia Oracle.
 - [ ] Activar `COOKIE_SECURE=true` y `HTTPS_ONLY=true` cuando HTTPS este listo.
 
 ## Nota de operacion

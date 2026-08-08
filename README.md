@@ -74,6 +74,10 @@ autenticación, la protección de rutas y la privacidad de teléfono y notas.
 
 ## Producción
 
+La guia completa para Ubuntu en Oracle Cloud, incluyendo `git clone`, usuario
+aislado, permisos, `systemd`, Nginx, HTTPS, firewall, respaldos y
+actualizaciones, esta en [`DEPLOY_UBUNTU.md`](./DEPLOY_UBUNTU.md).
+
 Antes de publicar:
 
 - usa una contraseña y un secreto distintos a los de desarrollo;

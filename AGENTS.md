@@ -87,3 +87,16 @@ del proceso que se ejecutara en el servidor de la rifa.
 - `multer`: recepcion limitada de imagenes en el panel administrativo.
 
 No agregar otra dependencia de produccion sin explicarla y obtener aprobacion.
+
+## Despliegue aprobado
+
+- El servidor objetivo es Ubuntu en Oracle Cloud con 1 GB de RAM.
+- Produccion usa un solo proceso Node.js administrado por `systemd`, enlazado a
+  `127.0.0.1:3000`, con Nginx como unico proxy publico.
+- HTTPS se obtiene y renueva con Certbot/Let's Encrypt. OCI y UFW solo exponen
+  80/443; SSH debe limitarse a la IP administrativa.
+- Codigo, secretos y datos se separan en `/opt/bolimangus`,
+  `/etc/bolimangus` y `/var/lib/bolimangus`. El usuario del servicio no puede
+  modificar el codigo.
+- Las plantillas operativas se mantienen en `deploy/` y la guia completa en
+  `DEPLOY_UBUNTU.md`.
