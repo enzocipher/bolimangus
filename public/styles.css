@@ -127,58 +127,76 @@ h3 { margin-block-end: .65rem; font-size: clamp(1.35rem, 3vw, 1.8rem); font-weig
 .ticket-pages a { display: inline-flex; min-height: 2.35rem; padding: .35rem .7rem; align-items: center; gap: .35rem; border: 1px solid var(--line); border-radius: .55rem; color: var(--muted); font-size: .75rem; font-weight: 800; text-decoration: none; }
 .ticket-pages a:hover, .ticket-pages a[aria-current="page"] { border-color: var(--lime); background: rgb(198 243 107 / 12%); color: var(--lime); }
 .ticket-pages small { color: inherit; font-size: .62rem; font-weight: 650; opacity: .75; }
-.ticket-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(12.5rem, 1fr)); gap: 1rem; }
+.ticket-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr)); gap: 1rem; }
 .ticket-card {
-  --ticket-accent: var(--lime);
+  --ticket-bg: #f0549a;
+  --ticket-bg-deep: #d9367e;
+  --ticket-accent: #fff4fa;
+  --ticket-line: rgb(255 244 250 / 58%);
   position: relative;
-  display: grid;
-  min-height: 13.5rem;
+  display: block;
+  min-height: 11rem;
   padding: 0;
   overflow: hidden;
   isolation: isolate;
-  border: 1px solid rgb(198 243 107 / 55%);
-  border-radius: 1rem;
-  background:
-    radial-gradient(circle at 0 50%, var(--surface) 0 8px, transparent 8.5px),
-    radial-gradient(circle at 100% 50%, var(--surface) 0 8px, transparent 8.5px),
-    linear-gradient(145deg, #1b2b4a 0%, var(--night-2) 58%, #10172a 100%);
-  box-shadow: 0 0 0 1px rgb(142 131 255 / 14%), inset 0 0 1.7rem rgb(142 131 255 / 10%), 0 0 1.5rem rgb(198 243 107 / 8%);
-  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+  border: 2px solid var(--ticket-bg);
+  border-radius: .95rem;
+  background-color: var(--ticket-bg);
+  background-image:
+    radial-gradient(circle at 0 15px, var(--night) 0 8px, transparent 8.5px),
+    radial-gradient(circle at 100% 15px, var(--night) 0 8px, transparent 8.5px),
+    linear-gradient(135deg, #ff72b2 0%, var(--ticket-bg) 48%, var(--ticket-bg-deep) 100%);
+  background-position: 0 0, 0 0, 0 0;
+  background-size: 100% 30px, 100% 30px, auto;
+  background-repeat: repeat-y, repeat-y, no-repeat;
+  box-shadow: 0 .7rem 1.8rem rgb(0 0 0 / 20%), 0 0 1.6rem rgb(255 84 161 / 18%);
+  transition: filter 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
 .ticket-card::before {
   position: absolute;
-  z-index: -1;
-  inset: .45rem;
-  border: 1px dashed rgb(198 243 107 / 30%);
-  border-radius: .7rem;
+  z-index: 0;
+  inset: .55rem;
+  left: 5.4rem;
+  border: 1px solid rgb(255 244 250 / 42%);
+  border-radius: .15rem;
   content: "";
   pointer-events: none;
 }
 .ticket-card::after {
   position: absolute;
+  z-index: 0;
+  top: .9rem;
   right: 1rem;
-  bottom: .85rem;
-  width: 3.25rem;
-  height: .85rem;
-  opacity: .6;
-  background: repeating-linear-gradient(90deg, var(--ticket-accent) 0 2px, transparent 2px 5px, var(--ticket-accent) 5px 6px, transparent 6px 9px);
-  content: "";
+  bottom: .9rem;
+  left: 6.15rem;
+  display: grid;
+  place-items: center;
+  border-top: 3px dashed var(--ticket-line);
+  border-bottom: 3px dashed var(--ticket-line);
+  background:
+    repeating-linear-gradient(90deg, var(--ticket-line) 0 16px, transparent 16px 27px) 0 .55rem / 100% 3px no-repeat,
+    repeating-linear-gradient(90deg, var(--ticket-line) 0 16px, transparent 16px 27px) 0 calc(100% - .55rem) / 100% 3px no-repeat;
+  content: "TICKET";
+  color: var(--ticket-accent);
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-weight: 950;
+  letter-spacing: .12em;
+  line-height: 1;
+  text-shadow: 0 2px 0 rgb(177 26 91 / 24%);
   pointer-events: none;
 }
-.ticket-card:hover { border-color: var(--ticket-accent); box-shadow: 0 0 0 1px var(--ticket-accent), inset 0 0 1.7rem rgb(142 131 255 / 14%), 0 0 2rem rgb(198 243 107 / 16%); transform: translateY(-4px) rotate(-.35deg); }
-.ticket-card.is-sold { --ticket-accent: var(--coral); border-color: rgb(255 129 107 / 65%); background: radial-gradient(circle at 0 50%, var(--surface) 0 8px, transparent 8.5px), radial-gradient(circle at 100% 50%, var(--surface) 0 8px, transparent 8.5px), linear-gradient(145deg, #3b2437 0%, #211c32 58%, #171526 100%); box-shadow: 0 0 0 1px rgb(255 129 107 / 15%), inset 0 0 1.7rem rgb(255 129 107 / 10%), 0 0 1.5rem rgb(255 129 107 / 8%); }
-.ticket-card.is-sold::before { border-color: rgb(255 129 107 / 35%); }
-.ticket-card-header { display: flex; min-height: 3.25rem; padding: .85rem 1rem .7rem; align-items: center; justify-content: space-between; gap: .5rem; border-bottom: 1px dashed rgb(198 243 107 / 35%); }
-.is-sold .ticket-card-header { border-color: rgb(255 129 107 / 35%); }
-.ticket-id { color: var(--violet); font-size: .68rem; font-weight: 900; letter-spacing: .12em; }
-.ticket-status { padding: .2rem .5rem; border: 1px solid rgb(198 243 107 / 40%); border-radius: 999px; background: rgb(198 243 107 / 12%); color: var(--lime); font-size: .6rem; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; }
-.is-sold .ticket-status { border-color: rgb(255 129 107 / 50%); background: rgb(255 129 107 / 15%); color: #ffb2a4; }
-.ticket-pair { position: relative; display: flex; margin: .9rem 1rem .6rem; align-items: center; justify-content: center; gap: .55rem; color: var(--ink); }
-.ticket-pair strong { display: grid; width: 3.3rem; aspect-ratio: 1; place-items: center; border: 1px solid rgb(198 243 107 / 72%); border-radius: .85rem; background: linear-gradient(145deg, #d8ff8f, var(--lime)); box-shadow: 0 0 .8rem rgb(198 243 107 / 35%), inset 0 -4px 0 rgb(11 16 32 / 12%); color: var(--night); font-size: 1.55rem; font-weight: 850; letter-spacing: -.08em; text-shadow: 0 1px 0 rgb(255 255 255 / 45%); }
-.is-sold .ticket-pair strong { border-color: rgb(255 129 107 / 72%); background: linear-gradient(145deg, #ffb09e, var(--coral)); box-shadow: 0 0 .8rem rgb(255 129 107 / 28%), inset 0 -4px 0 rgb(11 16 32 / 12%); }
-.ticket-pair span { color: var(--ticket-accent); font-size: 1.15rem; font-weight: 950; text-shadow: 0 0 .6rem currentColor; }
-.ticket-owner { min-height: 2.7em; margin: 0 1rem; padding-bottom: 2.2rem; color: var(--muted); font-size: .8rem; font-weight: 650; line-height: 1.35; text-align: center; }
-.is-sold .ticket-owner { color: var(--ink); }
+.ticket-card > * { position: relative; z-index: 1; }
+.ticket-card:hover { filter: saturate(1.1) brightness(1.04); box-shadow: 0 1rem 2.2rem rgb(0 0 0 / 25%), 0 0 2.2rem rgb(255 84 161 / 28%); transform: translateY(-4px) rotate(-.35deg); }
+.ticket-card.is-sold { --ticket-bg: #ff775f; --ticket-bg-deep: #e84d57; --ticket-line: rgb(255 250 246 / 62%); box-shadow: 0 .7rem 1.8rem rgb(0 0 0 / 20%), 0 0 1.6rem rgb(255 129 107 / 18%); }
+.ticket-card.is-sold::after { text-shadow: 0 2px 0 rgb(147 37 35 / 24%); }
+.ticket-card-header { position: absolute !important; top: .7rem; bottom: .7rem; left: .55rem; display: flex; width: 4.2rem; padding: .25rem .35rem .25rem .1rem; flex-direction: column; align-items: center; justify-content: space-between; gap: .4rem; border-right: 2px dotted var(--ticket-line); }
+.ticket-id { color: var(--ticket-accent); font-size: .7rem; font-weight: 950; letter-spacing: .08em; }
+.ticket-status { padding: .2rem .35rem; border: 1px solid var(--ticket-line); border-radius: .2rem; background: rgb(255 244 250 / 18%); color: var(--ticket-accent); font-size: .55rem; font-weight: 900; letter-spacing: .04em; text-align: center; text-transform: uppercase; }
+.ticket-pair { position: absolute !important; z-index: 2 !important; top: 50%; left: .65rem; display: flex; width: 4rem; margin: 0; align-items: center; justify-content: center; gap: .2rem; transform: translateY(-50%); color: var(--ticket-accent); }
+.ticket-pair strong { display: block; width: auto; border: 0; border-radius: 0; background: none; box-shadow: none; color: var(--ticket-accent); font-size: 1.15rem; font-weight: 950; letter-spacing: -.04em; text-shadow: 0 1px 0 rgb(177 26 91 / 24%); }
+.ticket-pair span { color: var(--ticket-accent); font-size: .8rem; font-weight: 950; text-shadow: none; }
+.ticket-owner { position: absolute !important; z-index: 2 !important; right: 1rem; bottom: 1rem; left: 6.2rem; min-height: 0; margin: 0; padding: 0; overflow: hidden; color: var(--ticket-accent); font-size: .72rem; font-weight: 750; line-height: 1.25; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+.is-sold .ticket-owner { color: var(--ticket-accent); }
 .empty-state, .empty-inline, .page-error { padding: 2rem; border: 1px dashed var(--line); border-radius: var(--radius); text-align: center; }
 .empty-state p, .empty-inline { margin-block-end: 0; color: var(--muted); }
 .page-error { width: min(100% - 2.5rem, var(--content)); margin: 2rem auto; border-color: rgb(255 129 107 / 40%); background: rgb(255 129 107 / 10%); color: var(--danger); }
@@ -201,6 +219,6 @@ h3 { margin-block-end: .65rem; font-size: clamp(1.35rem, 3vw, 1.8rem); font-weig
 [hidden] { display: none !important; }
 
 @media (max-width: 58rem) { .hero { min-height: auto; grid-template-columns: 1fr; } .hero-visual { min-height: 27rem; } .prize-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .prize-card:last-child:nth-child(odd) { grid-column: 1 / -1; } .ticket-toolbar, .contact-panel { grid-template-columns: 1fr; } .filter-group { flex-wrap: wrap; } }
-@media (max-width: 40rem) { .site-header { min-height: 4.75rem; } .brand > span:last-child { display: none; } .site-header nav a:first-child { display: none; } .hero { padding-block: 3.5rem; } h1 { font-size: clamp(3.5rem, 18vw, 5.5rem); } .raffle-facts { flex-direction: column; gap: 1rem; } .hero-visual { min-height: 24rem; } .hero-ticket { min-height: 22rem; } .orbit-one { width: 23rem; } .orbit-two { width: 18rem; height: 18rem; } .float-label { display: none; } .stats-bar > div { min-height: 6.5rem; padding: 1rem .5rem; } .stats-bar strong { font-size: 2.5rem; } .stats-bar span { font-size: .58rem; } .section-heading { align-items: start; flex-direction: column; } .participation-steps { grid-template-columns: 1fr; } .participation-steps li { min-height: 10rem; } .prize-grid { grid-template-columns: 1fr; } .prize-card:last-child:nth-child(odd) { grid-column: auto; } .ticket-pages { align-items: stretch; flex-direction: column; } .ticket-pages > span { margin: 0; } .ticket-pages a { justify-content: space-between; } .ticket-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ticket-card { padding: .8rem; } .ticket-pair strong { width: 2.75rem; font-size: 1.25rem; } .ticket-owner { font-size: .75rem; } .contact-panel { border-radius: .9rem; } .site-footer { align-items: start; flex-direction: column; } }
+@media (max-width: 40rem) { .site-header { min-height: 4.75rem; } .brand > span:last-child { display: none; } .site-header nav a:first-child { display: none; } .hero { padding-block: 3.5rem; } h1 { font-size: clamp(3.5rem, 18vw, 5.5rem); } .raffle-facts { flex-direction: column; gap: 1rem; } .hero-visual { min-height: 24rem; } .hero-ticket { min-height: 22rem; } .orbit-one { width: 23rem; } .orbit-two { width: 18rem; height: 18rem; } .float-label { display: none; } .stats-bar > div { min-height: 6.5rem; padding: 1rem .5rem; } .stats-bar strong { font-size: 2.5rem; } .stats-bar span { font-size: .58rem; } .section-heading { align-items: start; flex-direction: column; } .participation-steps { grid-template-columns: 1fr; } .participation-steps li { min-height: 10rem; } .prize-grid { grid-template-columns: 1fr; } .prize-card:last-child:nth-child(odd) { grid-column: auto; } .ticket-pages { align-items: stretch; flex-direction: column; } .ticket-pages > span { margin: 0; } .ticket-pages a { justify-content: space-between; } .ticket-grid { grid-template-columns: 1fr; } .ticket-card { min-height: 10rem; } .ticket-card::after { left: 5.8rem; font-size: clamp(1.55rem, 10vw, 2.25rem); } .ticket-card::before { left: 5.1rem; } .ticket-card-header { width: 4rem; } .ticket-pair { left: .5rem; width: 3.75rem; } .ticket-pair strong { font-size: 1rem; } .ticket-owner { right: .8rem; bottom: .8rem; left: 5.8rem; font-size: .72rem; } .contact-panel { border-radius: .9rem; } .site-footer { align-items: start; flex-direction: column; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
 @media (prefers-contrast: more) { :root { --muted: #c5cbe0; --line: #64708e; } }

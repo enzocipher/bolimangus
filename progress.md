@@ -72,6 +72,9 @@ Ultima actualizacion: 2026-08-08
 - [x] Se transformaron las tarjetas de tickets en boletos neón con acabado
   vectorial CSS: perforaciones laterales, borde punteado, código visual,
   números iluminados y estados disponibles/comprados diferenciados.
+- [x] Se ajustó el boleto visual para seguir la referencia solicitada: formato
+  horizontal rosa/coral, talón izquierdo, perforaciones repetidas, separador
+  punteado y texto central `TICKET`.
 - [x] Se incrementó la versión de los recursos públicos a `v=5` para que los
   navegadores no conserven las tarjetas antiguas en caché.
 - [x] Se agregaron las vistas públicas `/1` y `/2`: cada una muestra 53
