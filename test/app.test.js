@@ -47,6 +47,25 @@ describe('API de la rifa', () => {
     assert.equal(payload.tickets.length, 106);
   });
 
+  it('publica dos vistas aisladas de 53 tickets sin identificadores globales', async () => {
+    const [firstResponse, secondResponse] = await Promise.all([
+      fetch(`${baseUrl}/api/public/1`),
+      fetch(`${baseUrl}/api/public/2`),
+    ]);
+    assert.equal(firstResponse.status, 200);
+    assert.equal(secondResponse.status, 200);
+    const first = await firstResponse.json();
+    const second = await secondResponse.json();
+    assert.equal(first.tickets.length, 53);
+    assert.equal(second.tickets.length, 53);
+    assert.equal('id' in first.tickets[0], false);
+    assert.equal('id' in second.tickets[0], false);
+    assert.notDeepEqual(
+      [first.tickets[0].first, first.tickets[0].second],
+      [second.tickets[0].first, second.tickets[0].second],
+    );
+  });
+
   it('protege el panel, inicia sesion y exige cabecera administrativa', async () => {
     const unauthorized = await fetch(`${baseUrl}/api/admin/data`);
     assert.equal(unauthorized.status, 401);
@@ -133,6 +152,7 @@ describe('API de la rifa', () => {
       fetch(`${baseUrl}/admin`),
     ]);
     assert.equal(home.status, 200);
+    assert.equal(new URL(home.url).pathname, '/1');
     assert.equal(firstPage.status, 200);
     assert.equal(secondPage.status, 200);
     assert.equal(admin.status, 200);

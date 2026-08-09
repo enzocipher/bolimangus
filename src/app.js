@@ -36,6 +36,15 @@ function publicData(data) {
   };
 }
 
+function publicPageData(data, page) {
+  const result = publicData(data);
+  const start = (page - 1) * 53;
+  return {
+    ...result,
+    tickets: result.tickets.slice(start, start + 53).map(({ id, ...ticket }) => ticket),
+  };
+}
+
 async function detectImageType(filePath) {
   const handle = await open(filePath, 'r');
   try {
@@ -187,6 +196,16 @@ export async function createApp({ config, store = new JsonStore(config.dataFile)
     response.json(publicData(store.getData()));
   });
 
+  app.get('/api/public/:page', (request, response) => {
+    const page = Number(request.params.page);
+    if (page !== 1 && page !== 2) {
+      response.status(404).json({ error: { code: 'NOT_FOUND', message: 'Ruta no encontrada.' } });
+      return;
+    }
+    response.setHeader('Cache-Control', 'no-store');
+    response.json(publicPageData(store.getData(), page));
+  });
+
   app.post('/api/admin/login', asyncHandler(async (request, response) => {
     response.setHeader('Cache-Control', 'no-store');
     const key = request.ip || request.socket.remoteAddress || 'unknown';
@@ -317,7 +336,11 @@ export async function createApp({ config, store = new JsonStore(config.dataFile)
     maxAge: '1h',
   }));
 
-  app.get(['/', '/1', '/1/', '/2', '/2/'], (request, response) => {
+  app.get('/', (request, response) => {
+    response.redirect(302, '/1');
+  });
+
+  app.get(['/1', '/1/', '/2', '/2/'], (request, response) => {
     response.setHeader('Cache-Control', 'no-cache');
     response.sendFile(join(config.publicDir, 'index.html'));
   });

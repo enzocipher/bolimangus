@@ -40,9 +40,9 @@ publicarlos. No existe pasarela de pagos ni base de datos.
    La página queda en `http://127.0.0.1:3000` y el panel en
    `http://127.0.0.1:3000/admin`.
 
-   La página pública completa está en `/`. Para mostrar los tickets en dos
-   vistas más ligeras también están disponibles `/1` (tickets 1–53) y `/2`
-   (tickets 54–106); ambas usan el mismo archivo JSON y no regeneran pares.
+   La raíz `/` redirige a `/1`. Las vistas públicas `/1` y `/2` muestran 53
+   tickets cada una, sin enlaces ni textos que revelen la otra vista. Ambas
+   usan el mismo archivo JSON y no regeneran pares.
 
 ## Datos y respaldos
 

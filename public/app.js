@@ -20,7 +20,7 @@ const elements = {
 };
 
 const pageMatch = window.location.pathname.match(/^\/(1|2)\/?$/);
-const ticketPage = pageMatch ? Number(pageMatch[1]) : null;
+const ticketPage = pageMatch ? Number(pageMatch[1]) : 1;
 const ticketsPerPage = 53;
 
 const state = {
@@ -30,16 +30,8 @@ const state = {
 };
 
 function visibleTickets() {
-  if (!ticketPage) return state.data.tickets;
-  const start = (ticketPage - 1) * ticketsPerPage;
-  return state.data.tickets.slice(start, start + ticketsPerPage);
+  return state.data.tickets;
 }
-
-document.querySelectorAll('[data-ticket-page]').forEach((link) => {
-  const requestedPage = link.dataset.ticketPage === 'all' ? null : Number(link.dataset.ticketPage);
-  if (requestedPage === ticketPage) link.setAttribute('aria-current', 'page');
-  if (!requestedPage && !ticketPage) link.setAttribute('aria-current', 'page');
-});
 
 function textElement(tag, className, text) {
   const element = document.createElement(tag);
@@ -107,7 +99,7 @@ function matchesTicket(ticket) {
   if (!state.query) return true;
 
   const haystack = [
-    ticket.id,
+    ticket.id || '',
     formatPair(ticket),
     `${ticket.first} - ${ticket.second}`,
     ticket.buyer?.name || '',
@@ -122,12 +114,12 @@ function renderTickets() {
   for (const ticket of matches) {
     const article = document.createElement('article');
     article.className = `ticket-card ${ticket.buyer ? 'is-sold' : 'is-available'}`;
-    article.setAttribute('aria-label', `${ticket.id}, números ${ticket.first} y ${ticket.second}, ${ticket.buyer ? `comprado por ${ticket.buyer.name}` : 'disponible'}`);
+    article.setAttribute('aria-label', `Números ${ticket.first} y ${ticket.second}, ${ticket.buyer ? `comprado por ${ticket.buyer.name}` : 'disponible'}`);
 
     const header = document.createElement('div');
     header.className = 'ticket-card-header';
     header.append(
-      textElement('span', 'ticket-id', ticket.id),
+      textElement('span', 'ticket-id', 'RIFA'),
       textElement('span', 'ticket-status', ticket.buyer ? 'Comprado' : 'Disponible'),
     );
 
@@ -195,10 +187,8 @@ function renderContacts() {
 
 function renderRaffle() {
   const raffle = state.data.raffle;
-  document.title = ticketPage ? `${raffle.title} · Página ${ticketPage}` : raffle.title;
-  elements.pageTicketLabel.textContent = ticketPage
-    ? `Sorteo activo · Página ${ticketPage} · ${ticketsPerPage} tickets`
-    : 'Sorteo activo · 106 oportunidades';
+  document.title = raffle.title;
+  elements.pageTicketLabel.textContent = `Sorteo activo · ${ticketsPerPage} oportunidades`;
   elements.title.textContent = raffle.title;
   elements.subtitle.textContent = raffle.subtitle || 'Dos números, una oportunidad para ganar.';
   elements.description.textContent = raffle.description;
@@ -211,7 +201,7 @@ function renderRaffle() {
 
 async function loadData() {
   try {
-    const response = await fetch('/api/public', { headers: { Accept: 'application/json' } });
+    const response = await fetch(`/api/public/${ticketPage}`, { headers: { Accept: 'application/json' } });
     if (!response.ok) throw new Error('No se pudo cargar la rifa.');
     state.data = await response.json();
     renderRaffle();

@@ -3,17 +3,17 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Consulta los 106 tickets de la rifa, conoce los premios y revisa los participantes.">
+    <meta name="description" content="Consulta los tickets de la rifa, conoce los premios y revisa los participantes.">
     <meta name="theme-color" content="#0b1020">
     <title>Gran Rifa Especial</title>
-    <link rel="stylesheet" href="/styles.css?v=7">
-    <script src="/app.js?v=7" defer></script>
+    <link rel="stylesheet" href="/styles.css?v=8">
+    <script src="/app.js?v=8" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#contenido">Saltar al contenido</a>
 
     <header class="site-header">
-      <a class="brand" href="/" aria-label="Inicio de la rifa">
+      <a class="brand" href="#contenido" aria-label="Inicio de la rifa">
         <span class="brand-mark" aria-hidden="true">53</span>
         <span>Rifa especial</span>
       </a>
@@ -28,7 +28,7 @@
     <main id="contenido">
       <section class="hero" aria-labelledby="raffle-title">
         <div class="hero-copy">
-          <div class="hero-kicker"><span class="live-dot" aria-hidden="true"></span><span id="page-ticket-label">Sorteo activo · 106 oportunidades</span></div>
+          <div class="hero-kicker"><span class="live-dot" aria-hidden="true"></span><span id="page-ticket-label">Sorteo activo · 53 oportunidades</span></div>
           <h1 id="raffle-title">Gran Rifa Especial</h1>
           <p class="hero-subtitle" id="raffle-subtitle">Elige un ticket y participa.</p>
           <p class="hero-description" id="raffle-description">Cargando información de la rifa…</p>
@@ -59,7 +59,7 @@
       </section>
 
       <section class="stats-bar" aria-label="Estado de la rifa">
-        <div><strong id="stat-total">106</strong><span>Tickets totales</span></div>
+        <div><strong id="stat-total">53</strong><span>Tickets totales</span></div>
         <div><strong id="stat-available">—</strong><span>Disponibles</span></div>
         <div><strong id="stat-sold">—</strong><span>Comprados</span></div>
       </section>
@@ -104,7 +104,7 @@
         <div class="ticket-toolbar" role="search">
           <label class="search-field" for="ticket-search">
             <span>Buscar ticket, par o participante</span>
-            <input id="ticket-search" type="search" placeholder="23-25, T001 o un nombre" autocomplete="off">
+            <input id="ticket-search" type="search" placeholder="23-25 o un nombre" autocomplete="off">
           </label>
           <fieldset class="filter-group">
             <legend>Mostrar</legend>
@@ -113,12 +113,6 @@
             <label><input type="radio" name="ticket-filter" value="sold"> Comprados</label>
           </fieldset>
         </div>
-        <nav class="ticket-pages" aria-label="Páginas de tickets">
-          <span>Consulta por partes:</span>
-          <a href="/1" data-ticket-page="1">Página 1 <small>Tickets 1–53</small></a>
-          <a href="/2" data-ticket-page="2">Página 2 <small>Tickets 54–106</small></a>
-          <a href="/" data-ticket-page="all">Todos <small>106 tickets</small></a>
-        </nav>
         <p class="results-summary" id="results-summary" aria-live="polite">Cargando tickets…</p>
         <div class="ticket-grid" id="ticket-grid"></div>
         <div class="empty-state" id="ticket-empty" hidden><strong>No encontramos coincidencias</strong><p>Prueba con otro número, identificador o nombre.</p></div>

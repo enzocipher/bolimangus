@@ -1,6 +1,6 @@
 # Progreso de la rifa
 
-Ultima actualizacion: 2026-08-08
+Ultima actualizacion: 2026-08-09
 
 ## Terminado
 
@@ -75,8 +75,11 @@ Ultima actualizacion: 2026-08-08
 - [x] Se incrementó la versión de los recursos públicos a `v=7` para que los
   navegadores no conserven las tarjetas antiguas en caché.
 - [x] Se agregaron las vistas públicas `/1` y `/2`: cada una muestra 53
-  tickets del mismo JSON, sin regenerar ni duplicar pares. La raíz `/` conserva
-  la vista completa de 106 tickets para compatibilidad.
+  tickets del mismo JSON, sin regenerar ni duplicar pares. Cada vista descarga
+  solo su mitad, omite los identificadores globales y no enlaza ni menciona la
+  otra; la raíz `/` redirige a `/1`.
+- [x] En pantallas Android se compactó la cuadrícula a dos boletos por fila,
+  reduciendo adornos y espacios sin ocultar el par, estado o participante.
 - [ ] Confirmar el dominio definitivo y ejecutar la instalacion en la instancia.
 - [ ] Guardar respaldos periodicos fuera de la instancia Oracle.
 - [ ] Activar `COOKIE_SECURE=true` y `HTTPS_ONLY=true` cuando HTTPS este listo.
