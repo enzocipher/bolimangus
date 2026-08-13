@@ -2,6 +2,7 @@ node_modules/
 .env
 data/rifa.json
 data/rifa.backup.json
+data/rifa.pre-regeneracion-*.json
 data/*.tmp
 data/temp-uploads/
 public/uploads/*

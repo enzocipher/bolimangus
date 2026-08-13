@@ -220,7 +220,7 @@ function ticketMatches(ticket) {
 
 function openTicketDialog(ticket) {
   elements.ticketDialogTitle.textContent = ticket.buyer ? `Editar ${ticket.id}` : `Asignar ${ticket.id}`;
-  elements.ticketDialogPair.textContent = `Par ordenado: ${ticket.first} — ${ticket.second}`;
+  elements.ticketDialogPair.textContent = `Par único: ${ticket.first} — ${ticket.second}`;
   field(elements.ticketForm, 'ticketId').value = ticket.id;
   field(elements.ticketForm, 'name').value = ticket.buyer?.name || '';
   field(elements.ticketForm, 'phone').value = ticket.buyer?.phone || '';

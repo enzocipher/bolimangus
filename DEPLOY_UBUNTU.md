@@ -182,6 +182,20 @@ sudo -u bolimangus env \
 La segunda ejecucion solo verifica el archivo: no debe cambiar los pares. No
 borres `rifa.json` despues de vender tickets.
 
+### Migracion unica de la regla de pares (2026-08-12)
+
+Despues de copiar esta version del codigo y antes de iniciar el servicio,
+regenera los tickets una sola vez:
+
+```bash
+sudo -u bolimangus env \
+  DATA_FILE=/var/lib/bolimangus/data/rifa.json \
+  /usr/local/bin/node /opt/bolimangus/scripts/regenerate-tickets.js --confirm
+```
+
+El comando crea un respaldo fechado y se cancela si detecta compradores. No lo
+incluyas en actualizaciones futuras ni lo ejecutes nuevamente.
+
 ## 8. Instalar y arrancar el servicio systemd
 
 ```bash

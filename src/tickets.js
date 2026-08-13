@@ -8,26 +8,29 @@ function ticketId(index) {
   return `T${String(index + 1).padStart(3, '0')}`;
 }
 
+function pairKey(first, second) {
+  return `${Math.min(first, second)}:${Math.max(first, second)}`;
+}
+
 export function generateTickets({ drawNumber = (minimum, maximum) => randomInt(minimum, maximum) } = {}) {
-  const pairs = new Set();
-  const tickets = [];
-
-  while (tickets.length < TICKET_COUNT) {
-    const first = drawNumber(MIN_NUMBER, MAX_NUMBER + 1);
-    const second = drawNumber(MIN_NUMBER, MAX_NUMBER + 1);
-    const key = `${first}:${second}`;
-    if (pairs.has(key)) continue;
-
-    pairs.add(key);
-    tickets.push({
-      id: ticketId(tickets.length),
-      first,
-      second,
-      buyer: null,
-    });
+  const candidates = [];
+  for (let first = MIN_NUMBER; first < MAX_NUMBER; first += 1) {
+    for (let second = first + 1; second <= MAX_NUMBER; second += 1) {
+      candidates.push([first, second]);
+    }
   }
 
-  return tickets;
+  for (let index = candidates.length - 1; index > 0; index -= 1) {
+    const swapIndex = drawNumber(0, index + 1);
+    [candidates[index], candidates[swapIndex]] = [candidates[swapIndex], candidates[index]];
+  }
+
+  return candidates.slice(0, TICKET_COUNT).map(([first, second], index) => ({
+    id: ticketId(index),
+    first,
+    second,
+    buyer: null,
+  }));
 }
 
 export function validateTickets(tickets) {
@@ -47,9 +50,13 @@ export function validateTickets(tickets) {
       }
     }
 
-    const key = `${ticket.first}:${ticket.second}`;
+    if (ticket.first === ticket.second) {
+      throw new Error(`El ticket ${ticket.id} debe contener dos numeros distintos.`);
+    }
+
+    const key = pairKey(ticket.first, ticket.second);
     if (pairs.has(key)) {
-      throw new Error(`El par ordenado ${ticket.first}-${ticket.second} esta repetido.`);
+      throw new Error(`El par ${ticket.first}-${ticket.second} esta repetido, incluso considerando el orden inverso.`);
     }
     pairs.add(key);
 

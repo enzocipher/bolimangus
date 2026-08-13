@@ -2,7 +2,7 @@
   "name": "rifa-pares",
   "version": "1.0.0",
   "private": true,
-  "description": "Rifa ligera de 106 tickets con pares ordenados y panel administrativo.",
+  "description": "Rifa ligera de 106 tickets con pares distintos y panel administrativo.",
   "type": "module",
   "engines": {
     "node": ">=22"
@@ -12,6 +12,7 @@
     "start": "node --env-file-if-exists=.env server.js",
     "dev": "node --watch --env-file-if-exists=.env server.js",
     "init-data": "node scripts/initialize-data.js",
+    "regenerate-tickets": "node scripts/regenerate-tickets.js",
     "test": "node --test",
     "test:coverage": "node --test --experimental-test-coverage",
     "create-secrets": "node scripts/create-secrets.js"

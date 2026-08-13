@@ -1,8 +1,8 @@
-# Rifa de pares ordenados
+# Rifa de pares únicos
 
 Aplicación web ligera para una sola rifa de 106 tickets. Cada ticket contiene
-dos números entre 1 y 53. El orden importa, se permiten pares como `24-24` y
-ningún ticket completo se repite.
+dos números distintos entre 1 y 53. El orden no crea otro par: `25-26` y
+`26-25` se consideran el mismo ticket y no pueden coexistir.
 
 La página pública muestra premios, contacto, disponibilidad y el nombre del
 comprador. El panel privado vive en `/admin` y conserva teléfono y notas sin
@@ -47,7 +47,9 @@ publicarlos. No existe pasarela de pagos ni base de datos.
 ## Datos y respaldos
 
 - `data/rifa.json` se crea únicamente si no existe.
-- En esa primera creación se generan los 106 pares ordenados únicos.
+- En esa primera creación se generan 106 pares únicos de números distintos.
+- Un par y su inverso representan lo mismo: si existe `25-26`, no puede existir
+  `26-25`; tampoco se permiten pares como `25-25`.
 - Los pares no pueden editarse desde el panel.
 - Cada modificación válida crea `data/rifa.backup.json` con la versión
   inmediatamente anterior.
@@ -66,14 +68,23 @@ pnpm init-data
 Ejecutarlo nuevamente verifica el archivo existente; no vuelve a generar los
 pares.
 
+Para aplicar una sola vez la regla nueva sobre un JSON todavía sin compradores:
+
+```powershell
+pnpm regenerate-tickets -- --confirm
+```
+
+El comando conserva la configuración y los premios, crea un respaldo con fecha
+y se detiene sin modificar nada si encuentra al menos un comprador.
+
 ## Pruebas
 
 ```powershell
 pnpm test
 ```
 
-Las pruebas cubren la generación de pares, los valores iguales, el orden de los
-números, la prevención de duplicados, la persistencia y el respaldo, la
+Las pruebas cubren la generación de pares distintos, el rechazo de valores
+iguales y pares inversos, la persistencia y el respaldo, la
 autenticación, la protección de rutas y la privacidad de teléfono y notas.
 
 ## Producción

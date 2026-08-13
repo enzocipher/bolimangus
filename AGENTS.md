@@ -23,13 +23,17 @@ vive en `/admin`. No existe pasarela de pagos.
 ## Reglas inmutables de los tickets
 
 - Deben existir exactamente 106 tickets.
-- Cada ticket contiene un par **ordenado** `(numero1, numero2)`.
+- Cada ticket contiene dos numeros distintos dentro de un par no dirigido.
 - Ambos numeros estan dentro del intervalo inclusivo `1..53`.
-- Se permiten numeros iguales, por ejemplo `(24, 24)`.
-- El orden importa: `(23, 25)` y `(25, 23)` son tickets diferentes.
-- No puede repetirse el mismo par ordenado completo entre dos tickets.
+- No se permiten numeros iguales: `(24, 24)` es invalido.
+- El orden no crea otro ticket: `(23, 25)` y `(25, 23)` representan el mismo
+  par y no pueden coexistir.
+- No puede repetirse un par entre dos tickets, ni en el mismo orden ni
+  invertido.
 - Los 106 pares se generan aleatoriamente solo durante la inicializacion, si el
   archivo de datos todavia no existe.
+- La migracion aprobada el 2026-08-12 permite una regeneracion explicita, con
+  respaldo previo, solamente cuando ningun ticket tiene comprador.
 - Si el archivo existe pero esta corrupto o no cumple las reglas, la aplicacion
   debe detenerse con un error claro. Nunca debe regenerar los tickets en
   silencio, porque eso podria cambiar tickets vendidos.

@@ -1,6 +1,6 @@
 # Progreso de la rifa
 
-Ultima actualizacion: 2026-08-09
+Ultima actualizacion: 2026-08-12
 
 ## Terminado
 
@@ -12,10 +12,14 @@ Ultima actualizacion: 2026-08-09
   `web-coder`.
 - [x] Se limitaron las dependencias de produccion a `express`, `helmet` y
   `multer`.
-- [x] Se implemento la generacion inicial de exactamente 106 pares ordenados
-  unicos con valores de 1 a 53.
-- [x] Se admite que ambos valores sean iguales y se mantiene la distincion entre
-  pares invertidos como `23-25` y `25-23`.
+- [x] Se implemento la generacion inicial de exactamente 106 pares únicos con
+  dos valores distintos de 1 a 53.
+- [x] Se prohibieron los pares con valores iguales y los inversos duplicados:
+  `25-25` es inválido y `25-26` impide que exista `26-25`.
+- [x] Se agregó una regeneración explícita que conserva configuración y premios,
+  crea un respaldo fechado y se niega a operar si existen compradores.
+- [x] Se regeneró el JSON local (cero compradores): 106 pares únicos, cero
+  valores iguales y cero duplicados inversos; el respaldo quedó fuera de Git.
 - [x] Se impidio modificar o regenerar silenciosamente los pares existentes.
 - [x] Se inicializo `data/rifa.json` y se comprobo mediante SHA-256 que ejecutar
   la inicializacion de nuevo no cambia ningun ticket.

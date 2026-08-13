@@ -9,7 +9,7 @@ export function createDefaultData() {
     version: 1,
     raffle: {
       title: 'Gran Rifa Especial',
-      subtitle: '106 oportunidades, dos numeros por ticket',
+      subtitle: '53 oportunidades, dos numeros distintos por ticket',
       description: 'Participa por premios increibles. Consulta los tickets disponibles y comunicate con la organizacion para separar el tuyo.',
       drawDate: 'Fecha por confirmar',
       ticketPrice: 'Precio por confirmar',
