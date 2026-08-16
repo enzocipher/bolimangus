@@ -1,6 +1,6 @@
 # Progreso de la rifa
 
-Ultima actualizacion: 2026-08-12
+Ultima actualizacion: 2026-08-16
 
 ## Terminado
 
@@ -84,6 +84,10 @@ Ultima actualizacion: 2026-08-12
   otra; la raíz `/` redirige a `/1`.
 - [x] En pantallas Android se compactó la cuadrícula a dos boletos por fila,
   reduciendo adornos y espacios sin ocultar el par, estado o participante.
+- [x] Se cambió el texto público de `53 oportunidades` a `53 tickets`.
+- [x] Se agregó la modalidad basada en la Tinka con seis bolillas de ejemplo:
+  `/1` resalta primera + quinta para el primer premio y `/2` segunda + sexta
+  para el segundo, sin crear enlaces entre ambas vistas.
 - [ ] Confirmar el dominio definitivo y ejecutar la instalacion en la instancia.
 - [ ] Guardar respaldos periodicos fuera de la instancia Oracle.
 - [ ] Activar `COOKIE_SECURE=true` y `HTTPS_ONLY=true` cuando HTTPS este listo.

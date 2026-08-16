@@ -8,6 +8,15 @@ La página pública muestra premios, contacto, disponibilidad y el nombre del
 comprador. El panel privado vive en `/admin` y conserva teléfono y notas sin
 publicarlos. No existe pasarela de pagos ni base de datos.
 
+## Modalidad del sorteo
+
+- `/1`: gana el par formado por la primera y quinta bolilla del resultado
+  oficial de la Tinka.
+- `/2`: gana el par formado por la segunda y sexta bolilla.
+- Cada URL muestra únicamente sus 53 tickets y su propia regla, sin enlazar la
+  otra vista.
+- Los números usados en la explicación visual son solo un ejemplo.
+
 ## Requisitos
 
 - Node.js 22 o superior; para el servidor conviene una versión LTS.

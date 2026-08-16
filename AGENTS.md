@@ -39,6 +39,18 @@ vive en `/admin`. No existe pasarela de pagos.
   silencio, porque eso podria cambiar tickets vendidos.
 - Asignar, editar o retirar un comprador nunca debe modificar el par del ticket.
 
+## Modalidad confirmada del sorteo
+
+- El resultado oficial de la Tinka aporta seis bolillas ordenadas por posición.
+- Los 53 tickets publicados en `/1` participan por el primer premio usando la
+  primera y la quinta bolilla.
+- Los 53 tickets publicados en `/2` participan por el segundo premio usando la
+  segunda y la sexta bolilla.
+- Las capturas y números mostrados para explicar la modalidad son ejemplos; no
+  deben presentarse como un resultado real.
+- La interfaz debe decir `53 tickets`, no `53 oportunidades`, y no debe enlazar
+  `/1` con `/2`.
+
 ## Persistencia y privacidad
 
 - Las escrituras del JSON deben serializarse y realizarse de forma atomica.

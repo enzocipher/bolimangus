@@ -26,8 +26,8 @@ if (!process.argv.includes('--confirm')) {
   const temporaryPath = `${filePath}.${randomUUID()}.tmp`;
 
   data.tickets = generateTickets();
-  if (data.raffle?.subtitle === '106 oportunidades, dos numeros por ticket') {
-    data.raffle.subtitle = '53 oportunidades, dos numeros distintos por ticket';
+  if (['106 oportunidades, dos numeros por ticket', '53 oportunidades, dos numeros distintos por ticket'].includes(data.raffle?.subtitle)) {
+    data.raffle.subtitle = '53 tickets, dos numeros distintos por ticket';
   }
   data.updatedAt = new Date().toISOString();
   validateData(data);

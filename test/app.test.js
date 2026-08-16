@@ -160,7 +160,11 @@ describe('API de la rifa', () => {
     assert.match(contentSecurityPolicy, /default-src 'self'/);
     assert.doesNotMatch(contentSecurityPolicy, /upgrade-insecure-requests/);
     assert.equal(home.headers.get('x-content-type-options'), 'nosniff');
-    assert.match(await home.text(), /Tickets y participantes/);
+    const homeHtml = await home.text();
+    assert.match(homeHtml, /Tickets y participantes/);
+    assert.match(homeHtml, /Sorteo activo · 53 tickets/);
+    assert.match(homeHtml, /Modalidad del sorteo/);
+    assert.doesNotMatch(homeHtml, /53 oportunidades/);
     assert.match(await admin.text(), /Administración/);
   });
 });
