@@ -10,11 +10,11 @@ publicarlos. No existe pasarela de pagos ni base de datos.
 
 ## Modalidad del sorteo
 
-- `/1`: gana el par formado por la primera y quinta bolilla del resultado
-  oficial de la Tinka.
-- `/2`: gana el par formado por la segunda y sexta bolilla.
-- Cada URL muestra únicamente sus 53 tickets y su propia regla, sin enlazar la
-  otra vista.
+- Primer premio: gana el par formado por la primera y quinta bolilla del
+  resultado oficial de la Tinka.
+- Segundo premio: gana el par formado por la segunda y sexta bolilla.
+- `/1` y `/2` muestran las explicaciones de ambos premios, pero cada URL sigue
+  mostrando únicamente sus 53 tickets y no enlaza la otra vista.
 - Los números usados en la explicación visual son solo un ejemplo.
 
 ## Requisitos

@@ -42,10 +42,10 @@ vive en `/admin`. No existe pasarela de pagos.
 ## Modalidad confirmada del sorteo
 
 - El resultado oficial de la Tinka aporta seis bolillas ordenadas por posición.
-- Los 53 tickets publicados en `/1` participan por el primer premio usando la
-  primera y la quinta bolilla.
-- Los 53 tickets publicados en `/2` participan por el segundo premio usando la
-  segunda y la sexta bolilla.
+- El primer premio usa la primera y la quinta bolilla.
+- El segundo premio usa la segunda y la sexta bolilla.
+- Tanto `/1` como `/2` deben mostrar completas las explicaciones de ambos
+  premios, sin crear enlaces entre las dos vistas de tickets.
 - Las capturas y números mostrados para explicar la modalidad son ejemplos; no
   deben presentarse como un resultado real.
 - La interfaz debe decir `53 tickets`, no `53 oportunidades`, y no debe enlazar

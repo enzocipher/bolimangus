@@ -17,32 +17,11 @@ const elements = {
   contacts: document.querySelector('#contact-links'),
   error: document.querySelector('#page-error'),
   pageTicketLabel: document.querySelector('#page-ticket-label'),
-  drawPrize: document.querySelector('#draw-prize'),
-  drawRule: document.querySelector('#draw-rule'),
-  drawRuleCopy: document.querySelector('#draw-rule-copy'),
-  drawPairFirst: document.querySelector('#draw-pair-first'),
-  drawPairSecond: document.querySelector('#draw-pair-second'),
 };
 
 const pageMatch = window.location.pathname.match(/^\/(1|2)\/?$/);
 const ticketPage = pageMatch ? Number(pageMatch[1]) : 1;
 const ticketsPerPage = 53;
-const drawModes = {
-  1: {
-    prize: 'Primer premio',
-    rule: 'Primera y quinta bolilla',
-    copy: 'Gana el ticket cuyo par coincida con la primera y quinta bolilla. El orden dentro del ticket no cambia el par.',
-    positions: [1, 5],
-    pair: ['05', '25'],
-  },
-  2: {
-    prize: 'Segundo premio',
-    rule: 'Segunda y sexta bolilla',
-    copy: 'Gana el ticket cuyo par coincida con la segunda y sexta bolilla. El orden dentro del ticket no cambia el par.',
-    positions: [2, 6],
-    pair: ['07', '27'],
-  },
-};
 
 const state = {
   data: null,
@@ -220,25 +199,12 @@ function renderRaffle() {
   elements.terms.textContent = raffle.terms || 'La información definitiva se publicará próximamente.';
 }
 
-function renderDrawMode() {
-  const mode = drawModes[ticketPage];
-  elements.drawPrize.textContent = mode.prize;
-  elements.drawRule.textContent = mode.rule;
-  elements.drawRuleCopy.textContent = mode.copy;
-  elements.drawPairFirst.textContent = mode.pair[0];
-  elements.drawPairSecond.textContent = mode.pair[1];
-  document.querySelectorAll('[data-draw-position]').forEach((ball) => {
-    ball.classList.toggle('is-winning', mode.positions.includes(Number(ball.dataset.drawPosition)));
-  });
-}
-
 async function loadData() {
   try {
     const response = await fetch(`/api/public/${ticketPage}`, { headers: { Accept: 'application/json' } });
     if (!response.ok) throw new Error('No se pudo cargar la rifa.');
     state.data = await response.json();
     renderRaffle();
-    renderDrawMode();
     renderStats();
     renderPrizes();
     renderContacts();

@@ -86,8 +86,9 @@ Ultima actualizacion: 2026-08-16
   reduciendo adornos y espacios sin ocultar el par, estado o participante.
 - [x] Se cambió el texto público de `53 oportunidades` a `53 tickets`.
 - [x] Se agregó la modalidad basada en la Tinka con seis bolillas de ejemplo:
-  `/1` resalta primera + quinta para el primer premio y `/2` segunda + sexta
-  para el segundo, sin crear enlaces entre ambas vistas.
+  primera + quinta para el primer premio y segunda + sexta para el segundo.
+  Ambas explicaciones aparecen juntas tanto en `/1` como en `/2`, sin crear
+  enlaces entre las vistas.
 - [ ] Confirmar el dominio definitivo y ejecutar la instalacion en la instancia.
 - [ ] Guardar respaldos periodicos fuera de la instancia Oracle.
 - [ ] Activar `COOKIE_SECURE=true` y `HTTPS_ONLY=true` cuando HTTPS este listo.

@@ -7,7 +7,7 @@
     <meta name="theme-color" content="#0b1020">
     <title>Gran Rifa Especial</title>
     <link rel="stylesheet" href="/styles.css?v=9">
-    <script src="/app.js?v=9" defer></script>
+    <script src="/app.js?v=10" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#contenido">Saltar al contenido</a>
@@ -91,25 +91,41 @@
           <div class="draw-mode-copy">
             <p class="eyebrow">Modalidad del sorteo</p>
             <h3 id="draw-mode-title">La jugada ganadora define el par premiado</h3>
-            <p>Tomaremos como referencia el resultado oficial de la Tinka. Para estos 53 tickets se seleccionan dos posiciones específicas del sorteo.</p>
-            <p class="draw-prize" id="draw-prize">Primer premio</p>
-            <strong class="draw-rule" id="draw-rule">Primera y quinta bolilla</strong>
-            <p id="draw-rule-copy">Gana el ticket cuyo par coincida con la primera y quinta bolilla. El orden dentro del ticket no cambia el par.</p>
+            <p>Tomaremos como referencia el resultado oficial de la Tinka. Los dos premios se determinan usando posiciones específicas de las seis bolillas.</p>
+            <div class="draw-prize-rules">
+              <article class="draw-prize-card is-first-prize">
+                <p class="draw-prize">Primer premio</p>
+                <strong class="draw-rule">Primera y quinta bolilla</strong>
+                <p>Gana el ticket cuyo par coincida con la primera y quinta bolilla.</p>
+              </article>
+              <article class="draw-prize-card is-second-prize">
+                <p class="draw-prize">Segundo premio</p>
+                <strong class="draw-rule">Segunda y sexta bolilla</strong>
+                <p>Gana el ticket cuyo par coincida con la segunda y sexta bolilla.</p>
+              </article>
+            </div>
+            <small class="draw-order-note">El orden dentro del ticket no cambia el par.</small>
           </div>
 
           <div class="draw-example" aria-label="Ejemplo de una jugada ganadora de la Tinka">
             <span class="draw-example-label">Ejemplo de resultado</span>
             <ol class="draw-balls" aria-label="Bolillas: 05, 07, 10, 16, 25 y 27">
-              <li class="is-winning" data-draw-position="1"><span>1.ª</span><strong>05</strong></li>
-              <li data-draw-position="2"><span>2.ª</span><strong>07</strong></li>
-              <li data-draw-position="3"><span>3.ª</span><strong>10</strong></li>
-              <li data-draw-position="4"><span>4.ª</span><strong>16</strong></li>
-              <li class="is-winning" data-draw-position="5"><span>5.ª</span><strong>25</strong></li>
-              <li data-draw-position="6"><span>6.ª</span><strong>27</strong></li>
+              <li class="is-first-prize"><span>1.ª</span><strong>05</strong></li>
+              <li class="is-second-prize"><span>2.ª</span><strong>07</strong></li>
+              <li><span>3.ª</span><strong>10</strong></li>
+              <li><span>4.ª</span><strong>16</strong></li>
+              <li class="is-first-prize"><span>5.ª</span><strong>25</strong></li>
+              <li class="is-second-prize"><span>6.ª</span><strong>27</strong></li>
             </ol>
-            <div class="draw-result">
-              <span>Par ganador del ejemplo</span>
-              <strong><b id="draw-pair-first">05</b><i>—</i><b id="draw-pair-second">25</b></strong>
+            <div class="draw-results">
+              <div class="draw-result is-first-prize">
+                <span>Ejemplo · primer premio</span>
+                <strong><b>05</b><i>—</i><b>25</b></strong>
+              </div>
+              <div class="draw-result is-second-prize">
+                <span>Ejemplo · segundo premio</span>
+                <strong><b>07</b><i>—</i><b>27</b></strong>
+              </div>
             </div>
             <small>Los números mostrados son únicamente un ejemplo para explicar la modalidad.</small>
           </div>

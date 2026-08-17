@@ -164,6 +164,11 @@ describe('API de la rifa', () => {
     assert.match(homeHtml, /Tickets y participantes/);
     assert.match(homeHtml, /Sorteo activo · 53 tickets/);
     assert.match(homeHtml, /Modalidad del sorteo/);
+    assert.match(homeHtml, /Primer premio/);
+    assert.match(homeHtml, /Segundo premio/);
+    const secondPageHtml = await secondPage.text();
+    assert.match(secondPageHtml, /Primer premio/);
+    assert.match(secondPageHtml, /Segundo premio/);
     assert.doesNotMatch(homeHtml, /53 oportunidades/);
     assert.match(await admin.text(), /Administración/);
   });
