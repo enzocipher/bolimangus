@@ -89,6 +89,8 @@ Ultima actualizacion: 2026-08-16
   primera + quinta para el primer premio y segunda + sexta para el segundo.
   Ambas explicaciones aparecen juntas tanto en `/1` como en `/2`, sin crear
   enlaces entre las vistas.
+- [x] La cuadrícula de premios centra automáticamente uno, dos o tres premios
+  usando columnas de ancho limitado y conserva el diseño responsive.
 - [ ] Confirmar el dominio definitivo y ejecutar la instalacion en la instancia.
 - [ ] Guardar respaldos periodicos fuera de la instancia Oracle.
 - [ ] Activar `COOKIE_SECURE=true` y `HTTPS_ONLY=true` cuando HTTPS este listo.
