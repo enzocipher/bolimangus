@@ -6,8 +6,8 @@
     <meta name="description" content="Consulta los tickets de la rifa, conoce los premios y revisa los participantes.">
     <meta name="theme-color" content="#0b1020">
     <title>Gran Rifa Especial</title>
-    <link rel="stylesheet" href="/styles.css?v=10">
-    <script src="/app.js?v=10" defer></script>
+    <link rel="stylesheet" href="/styles.css?v=11">
+    <script src="/app.js?v=11" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#contenido">Saltar al contenido</a>
@@ -61,29 +61,29 @@
       <section class="stats-bar" aria-label="Estado de la rifa">
         <div><strong id="stat-total">53</strong><span>Tickets totales</span></div>
         <div><strong id="stat-available">—</strong><span>Disponibles</span></div>
-        <div><strong id="stat-sold">—</strong><span>Comprados</span></div>
+        <div><strong id="stat-sold">—</strong><span>Separados</span></div>
       </section>
 
       <section class="section participation-section" id="como-participar" aria-labelledby="participation-title">
         <div class="section-heading participation-heading">
           <div>
             <p class="eyebrow">Participar es sencillo</p>
-            <h2 id="participation-title">Elige, escríbenos y confirma</h2>
+            <h2 id="participation-title">Elige, inscríbete y confirma</h2>
           </div>
-          <p>No necesitas registrarte ni ingresar datos de pago en esta página.</p>
+          <p>Puedes separar tu ticket aquí con tu nombre y teléfono. Nunca ingreses datos de pago en esta página.</p>
         </div>
         <ol class="participation-steps">
           <li>
             <span class="step-number" aria-hidden="true">01</span>
-            <div><h3>Busca tu ticket</h3><p>Revisa los pares disponibles y escoge el que prefieras.</p></div>
+            <div><h3>Busca tu ticket</h3><p>Revisa los pares disponibles y toca el que prefieras.</p></div>
           </li>
           <li>
             <span class="step-number" aria-hidden="true">02</span>
-            <div><h3>Habla con nosotros</h3><p>Usa los datos de contacto publicados por la organización.</p></div>
+            <div><h3>Ingresa tus datos</h3><p>Escribe tu nombre y teléfono para dejar el ticket pendiente de pago.</p></div>
           </li>
           <li>
             <span class="step-number" aria-hidden="true">03</span>
-            <div><h3>Comprueba tu nombre</h3><p>Cuando se confirme, aparecerás junto a tu ticket en la lista pública.</p></div>
+            <div><h3>Coordina el pago</h3><p>La organización verificará el pago y confirmará tu ticket.</p></div>
           </li>
         </ol>
 
@@ -142,8 +142,8 @@
 
       <section class="section tickets-section" id="tickets" aria-labelledby="tickets-title">
         <div class="section-heading">
-          <div><p class="eyebrow">02 · Elige tu oportunidad</p><h2 id="tickets-title">Tickets y participantes</h2></div>
-          <p>Cada tarjeta representa un ticket. Los números son distintos y el par inverso no se repite.</p>
+          <div><p class="eyebrow">02 · Elige tu ticket</p><h2 id="tickets-title">Tickets y participantes</h2></div>
+          <p>Toca un ticket disponible para inscribirte. Los administradores revisarán el pago y las reservas.</p>
         </div>
         <div class="ticket-toolbar" role="search">
           <label class="search-field" for="ticket-search">
@@ -154,7 +154,7 @@
             <legend>Mostrar</legend>
             <label><input type="radio" name="ticket-filter" value="all" checked> Todos</label>
             <label><input type="radio" name="ticket-filter" value="available"> Disponibles</label>
-            <label><input type="radio" name="ticket-filter" value="sold"> Comprados</label>
+            <label><input type="radio" name="ticket-filter" value="sold"> Separados</label>
           </fieldset>
         </div>
         <p class="results-summary" id="results-summary" aria-live="polite">Cargando tickets…</p>
@@ -163,7 +163,7 @@
       </section>
 
       <section class="contact-panel" id="contacto" aria-labelledby="contact-title">
-        <div><p class="eyebrow">03 · Contacto directo</p><h2 id="contact-title">¿Quieres separar un ticket?</h2><p>Comunícate con la organización. Esta página no solicita ni procesa pagos.</p></div>
+        <div><p class="eyebrow">03 · Contacto directo</p><h2 id="contact-title">¿Necesitas ayuda con tu reserva?</h2><p>Comunícate con la organización para coordinar el pago. Esta página no solicita ni procesa pagos.</p></div>
         <div class="contact-links" id="contact-links"><span class="contact-placeholder">Los datos de contacto se publicarán próximamente.</span></div>
       </section>
 
@@ -175,6 +175,29 @@
     </main>
 
     <footer class="site-footer"><p><strong>Rifa especial</strong> · Información administrada directamente por la organización.</p><a href="/admin" rel="nofollow">Administración <span aria-hidden="true">↗</span></a></footer>
+
+    <dialog class="registration-dialog" id="registration-dialog" aria-labelledby="registration-title">
+      <form method="dialog" class="registration-close-form">
+        <button type="submit" class="registration-close" aria-label="Cerrar">×</button>
+      </form>
+      <p class="eyebrow">Reserva directa</p>
+      <h2 id="registration-title">Inscríbete en este ticket</h2>
+      <p class="registration-pair" id="registration-pair"></p>
+      <p class="registration-help">Tu reserva quedará pendiente hasta que la organización compruebe el pago.</p>
+      <form class="registration-form" id="registration-form">
+        <label class="public-field">
+          <span>Nombre que se mostrará públicamente</span>
+          <input name="name" required minlength="2" maxlength="100" autocomplete="name">
+        </label>
+        <label class="public-field">
+          <span>Teléfono de contacto</span>
+          <input name="phone" type="tel" required maxlength="40" autocomplete="tel" inputmode="tel" placeholder="Ej. 987 654 321">
+          <small>El teléfono es privado: solamente lo verán los administradores.</small>
+        </label>
+        <p class="registration-status" id="registration-status" role="status" aria-live="polite"></p>
+        <button class="button button-primary" type="submit">Reservar este ticket</button>
+      </form>
+    </dialog>
     <noscript><p class="noscript-message">Activa JavaScript para consultar el estado actualizado de los tickets.</p></noscript>
   </body>
 </html>

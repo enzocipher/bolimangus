@@ -4,9 +4,11 @@ Aplicación web ligera para una sola rifa de 106 tickets. Cada ticket contiene
 dos números distintos entre 1 y 53. El orden no crea otro par: `25-26` y
 `26-25` se consideran el mismo ticket y no pueden coexistir.
 
-La página pública muestra premios, contacto, disponibilidad y el nombre del
-comprador. El panel privado vive en `/admin` y conserva teléfono y notas sin
-publicarlos. No existe pasarela de pagos ni base de datos.
+La página pública muestra premios, contacto y disponibilidad. Una persona puede
+tocar un ticket libre e inscribirse con nombre y teléfono; la reserva queda
+pendiente de pago. El panel privado vive en `/admin`, conserva el teléfono y las
+notas sin publicarlos, permite confirmar el pago o retirar al participante y
+liberar el ticket. No existe pasarela de pagos ni base de datos.
 
 ## Modalidad del sorteo
 
@@ -62,6 +64,9 @@ publicarlos. No existe pasarela de pagos ni base de datos.
 - Los pares no pueden editarse desde el panel.
 - Cada modificación válida crea `data/rifa.backup.json` con la versión
   inmediatamente anterior.
+- Las inscripciones públicas se guardan como `pending`. Solo `/admin` puede
+  marcarlas como `paid` o retirar al participante. Una comprobación atómica
+  impide que dos personas ocupen el mismo ticket.
 - Si `rifa.json` está corrupto o no cumple las reglas, el servidor se detiene y
   no genera tickets nuevos.
 - Las imágenes se guardan en `public/uploads` con nombres aleatorios. Solo se
@@ -93,8 +98,9 @@ pnpm test
 ```
 
 Las pruebas cubren la generación de pares distintos, el rechazo de valores
-iguales y pares inversos, la persistencia y el respaldo, la
-autenticación, la protección de rutas y la privacidad de teléfono y notas.
+iguales y pares inversos, la persistencia y el respaldo, la autenticación, las
+reservas simultáneas, la separación entre `/1` y `/2`, el control de pago, la
+liberación de tickets y la privacidad de teléfono y notas.
 
 ## Producción
 

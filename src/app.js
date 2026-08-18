@@ -4,7 +4,7 @@ import multer from 'multer';
 import { mkdir, open, rename, rm } from 'node:fs/promises';
 import { basename, join } from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { isAppError, notFound, validationError } from './errors.js';
+import { conflict, isAppError, notFound, validationError } from './errors.js';
 import { JsonStore } from './store.js';
 import {
   COOKIE_NAME,
@@ -16,7 +16,7 @@ import {
   verifyPassword,
   verifySessionToken,
 } from './auth.js';
-import { cleanBuyer, cleanPrize, cleanRaffleSettings } from './validation.js';
+import { cleanBuyer, cleanPrize, cleanPublicBuyer, cleanRaffleSettings } from './validation.js';
 
 function asyncHandler(handler) {
   return (request, response, next) => Promise.resolve(handler(request, response, next)).catch(next);
@@ -30,7 +30,10 @@ function publicData(data) {
       id: ticket.id,
       first: ticket.first,
       second: ticket.second,
-      buyer: ticket.buyer ? { name: ticket.buyer.name } : null,
+      buyer: ticket.buyer ? {
+        name: ticket.buyer.name,
+        paymentStatus: ticket.buyer.paymentStatus || 'paid',
+      } : null,
     })),
     updatedAt: data.updatedAt,
   };
@@ -183,6 +186,14 @@ export async function createApp({ config, store = new JsonStore(config.dataFile)
     next();
   }
 
+  function requirePublicRequest(request, response, next) {
+    if (request.get('X-Rifa-Public') !== '1') {
+      response.status(403).json({ error: { code: 'INVALID_REQUEST', message: 'Solicitud publica invalida.' } });
+      return;
+    }
+    next();
+  }
+
   app.get('/health', (request, response) => {
     if (app.locals.isShuttingDown) {
       response.status(503).json({ status: 'shutting_down' });
@@ -205,6 +216,40 @@ export async function createApp({ config, store = new JsonStore(config.dataFile)
     response.setHeader('Cache-Control', 'no-store');
     response.json(publicPageData(store.getData(), page));
   });
+
+  app.post('/api/public/:page/tickets/register', requirePublicRequest, asyncHandler(async (request, response) => {
+    const page = Number(request.params.page);
+    if (page !== 1 && page !== 2) throw notFound('La vista de tickets no existe.');
+
+    const first = Number(request.body?.first);
+    const second = Number(request.body?.second);
+    if (!Number.isInteger(first) || !Number.isInteger(second)
+      || first < 1 || first > 53 || second < 1 || second > 53 || first === second) {
+      throw validationError('El par de numeros enviado no es valido.');
+    }
+    const buyer = cleanPublicBuyer(request.body);
+
+    const ticket = await store.update((data) => {
+      const start = (page - 1) * 53;
+      const pageTickets = data.tickets.slice(start, start + 53);
+      const found = pageTickets.find((item) => (
+        (item.first === first && item.second === second)
+        || (item.first === second && item.second === first)
+      ));
+      if (!found) throw notFound('Ese ticket no pertenece a esta vista de la rifa.');
+      if (found.buyer) throw conflict('Ese ticket acaba de ser reservado. Elige otro disponible.');
+      found.buyer = buyer;
+      return found;
+    });
+
+    response.status(201).json({
+      ticket: {
+        first: ticket.first,
+        second: ticket.second,
+        buyer: { name: ticket.buyer.name, paymentStatus: ticket.buyer.paymentStatus },
+      },
+    });
+  }));
 
   app.post('/api/admin/login', asyncHandler(async (request, response) => {
     response.setHeader('Cache-Control', 'no-store');
@@ -254,11 +299,15 @@ export async function createApp({ config, store = new JsonStore(config.dataFile)
   }));
 
   app.patch('/api/admin/tickets/:ticketId', requireAdmin, requireAdminRequest, asyncHandler(async (request, response) => {
-    const buyer = cleanBuyer(request.body?.buyer);
     const ticket = await store.update((data) => {
       const found = data.tickets.find((item) => item.id === request.params.ticketId);
       if (!found) throw notFound('El ticket no existe.');
-      found.buyer = buyer;
+      const input = request.body?.buyer;
+      found.buyer = input === null ? null : cleanBuyer(input, {
+        assignedAt: found.buyer?.assignedAt,
+        defaultPaymentStatus: found.buyer?.paymentStatus || 'paid',
+        source: found.buyer?.source || 'admin',
+      });
       return found;
     });
     response.json({ ticket });

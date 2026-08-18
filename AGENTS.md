@@ -63,6 +63,22 @@ vive en `/admin`. No existe pasarela de pagos.
 - Validar todos los datos en el servidor, aunque tambien se validen en el
   navegador.
 
+## Inscripcion publica y control de pago
+
+- Una persona puede tocar un ticket disponible en `/1` o `/2` e inscribirse
+  con nombre publico y telefono privado.
+- Toda inscripcion publica nace con estado `pending`; la aplicacion no cobra ni
+  recibe datos de pago.
+- Solo el administrador puede cambiar una reserva a `paid`, editar sus datos o
+  retirar al participante y volver a dejar disponible el ticket.
+- El servidor debe comprobar en la misma escritura atomica que el ticket sigue
+  libre y que pertenece a la vista `/1` o `/2` desde la que se solicita. Nunca
+  confiar en un identificador o estado de pago enviado por el cliente publico.
+- Las reservas antiguas sin estado explicito se interpretan como pagadas para
+  conservar compatibilidad con el JSON existente.
+- La API publica puede mostrar el nombre y si esta pendiente o confirmado;
+  telefono, notas y origen de la reserva son exclusivos de `/admin`.
+
 ## Calidad y operacion
 
 - Priorizar HTML semantico, navegacion por teclado, contraste legible y diseno

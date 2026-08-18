@@ -205,6 +205,7 @@ h3 { margin-block-end: .65rem; font-size: clamp(1.35rem, 3vw, 1.8rem); font-weig
 .ticket-card > * { position: relative; z-index: 1; }
 .ticket-card:hover { filter: saturate(1.08) brightness(1.03); box-shadow: 0 1.15rem 2rem rgb(0 0 0 / 32%), 0 0 1.4rem rgb(246 200 79 / 12%); transform: translateY(-4px) rotate(-.25deg); }
 .ticket-card.is-sold { --ticket-paper: #d9a93d; --ticket-paper-light: #efc65d; --ticket-paper-deep: #bb7820; }
+.ticket-card.is-pending { --ticket-paper: #f2b85a; --ticket-paper-light: #ffd17f; --ticket-paper-deep: #ce8326; }
 .ticket-card-header { position: absolute !important; z-index: 3 !important; inset: .85rem .8rem; display: block; pointer-events: none; }
 .ticket-id { position: absolute; top: 50%; left: .1rem; color: var(--ticket-ink); font-size: .88rem; font-weight: 950; letter-spacing: .08em; line-height: 1; writing-mode: vertical-rl; transform: translateY(-50%) rotate(180deg); }
 .ticket-status { position: absolute; top: 50%; right: .05rem; padding: 0; border: 0; border-radius: 0; background: none; color: var(--ticket-ink); font-size: .62rem; font-weight: 950; letter-spacing: .06em; line-height: 1; text-transform: uppercase; writing-mode: vertical-rl; transform: translateY(-50%); }
@@ -217,6 +218,10 @@ h3 { margin-block-end: .65rem; font-size: clamp(1.35rem, 3vw, 1.8rem); font-weig
 .ticket-pair span { color: var(--ticket-ink); font-size: 1.35rem; font-weight: 950; text-shadow: none; }
 .ticket-owner { position: absolute !important; z-index: 3 !important; right: 4.2rem; bottom: 2.2rem; left: 4.2rem; min-height: 0; margin: 0; padding: 0; overflow: hidden; color: var(--ticket-ink); font-size: .68rem; font-weight: 850; letter-spacing: .03em; line-height: 1.2; text-align: center; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
 .is-sold .ticket-owner { color: var(--ticket-ink); }
+.ticket-select-button { position: absolute !important; z-index: 6 !important; display: flex; inset: 0; padding: 0 4.2rem 2rem; align-items: end; justify-content: center; border: 0; border-radius: .4rem; background: transparent; color: var(--ticket-ink); }
+.ticket-select-button span { padding: .12rem .55rem; border: 1px solid rgb(23 18 7 / 55%); border-radius: 999px; background: rgb(255 255 255 / 25%); font-size: .62rem; font-weight: 950; letter-spacing: .06em; line-height: 1.25; text-transform: uppercase; transition: background-color 160ms ease, transform 160ms ease; }
+.ticket-select-button:hover span { background: rgb(255 255 255 / 48%); transform: scale(1.04); }
+.ticket-select-button:focus-visible { outline: 3px solid var(--violet); outline-offset: -5px; }
 .empty-state, .empty-inline, .page-error { padding: 2rem; border: 1px dashed var(--line); border-radius: var(--radius); text-align: center; }
 .empty-state p, .empty-inline { margin-block-end: 0; color: var(--muted); }
 .page-error { width: min(100% - 2.5rem, var(--content)); margin: 2rem auto; border-color: rgb(255 129 107 / 40%); background: rgb(255 129 107 / 10%); color: var(--danger); }
@@ -235,11 +240,28 @@ h3 { margin-block-end: .65rem; font-size: clamp(1.35rem, 3vw, 1.8rem); font-weig
 .site-footer { display: flex; padding: 1.5rem max(1.25rem, calc((100vw - var(--content)) / 2)); align-items: center; justify-content: space-between; gap: 1rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .78rem; }
 .site-footer p { margin: 0; }
 .site-footer a { color: var(--lime); }
+.registration-dialog { width: min(calc(100% - 2rem), 32rem); max-height: calc(100vh - 2rem); padding: clamp(1.25rem, 4vw, 2rem); overflow-y: auto; border: 1px solid var(--line); border-radius: 1.2rem; background: var(--night-2); box-shadow: 0 2rem 7rem rgb(0 0 0 / 55%); color: var(--ink); }
+.registration-dialog::backdrop { background: rgb(3 7 16 / 78%); backdrop-filter: blur(5px); }
+.registration-dialog h2 { margin-block-end: .65rem; font-size: clamp(2rem, 7vw, 3rem); }
+.registration-close-form { position: absolute; top: .8rem; right: .8rem; }
+.registration-close { display: grid; width: 2.75rem; height: 2.75rem; padding: 0; place-items: center; border: 1px solid var(--line); border-radius: .7rem; background: var(--surface); color: var(--muted); font-size: 1.5rem; line-height: 1; }
+.registration-pair { margin: 0 0 .45rem; color: var(--lime); font-size: 1.35rem; font-weight: 900; }
+.registration-help { margin-block-end: 1.25rem; color: var(--muted); }
+.registration-form { display: grid; gap: 1rem; }
+.public-field { display: grid; gap: .4rem; color: var(--ink); font-size: .78rem; font-weight: 800; }
+.public-field input { width: 100%; min-height: 3rem; padding: .65rem .8rem; border: 1px solid var(--line); border-radius: .65rem; outline: 0; background: var(--surface); color: var(--ink); }
+.public-field input:focus { border-color: var(--lime); box-shadow: 0 0 0 3px rgb(198 243 107 / 12%); }
+.public-field small { color: var(--muted); font-size: .68rem; font-weight: 500; }
+.registration-status { min-height: 1.5rem; margin: 0; color: var(--muted); font-size: .78rem; font-weight: 750; }
+.registration-status.is-error { color: var(--danger); }
+.registration-status.is-success { color: var(--success); }
+.registration-form .button { width: 100%; }
 .noscript-message { position: fixed; z-index: 50; right: 1rem; bottom: 1rem; left: 1rem; margin: 0; padding: 1rem; border-radius: .7rem; background: var(--coral); color: var(--night); text-align: center; }
 [hidden] { display: none !important; }
 
 @media (max-width: 58rem) { .hero { min-height: auto; grid-template-columns: 1fr; } .hero-visual { min-height: 27rem; } .draw-mode { grid-template-columns: 1fr; } .ticket-toolbar, .contact-panel { grid-template-columns: 1fr; } .filter-group { flex-wrap: wrap; } }
 @media (max-width: 40rem) { .site-header { min-height: 4.75rem; } .brand > span:last-child { display: none; } .site-header nav a:first-child { display: none; } .hero { padding-block: 3.5rem; } h1 { font-size: clamp(3.5rem, 18vw, 5.5rem); } .raffle-facts { flex-direction: column; gap: 1rem; } .hero-visual { min-height: 24rem; } .hero-ticket { min-height: 22rem; } .orbit-one { width: 23rem; } .orbit-two { width: 18rem; height: 18rem; } .float-label { display: none; } .stats-bar > div { min-height: 6.5rem; padding: 1rem .5rem; } .stats-bar strong { font-size: 2.5rem; } .stats-bar span { font-size: .58rem; } .section-heading { align-items: start; flex-direction: column; } .participation-steps { grid-template-columns: 1fr; } .participation-steps li { min-height: 10rem; } .tickets-section { padding-inline: .5rem; } .tickets-section .section-heading, .ticket-toolbar, .results-summary, .empty-state { margin-inline: .75rem; } .ticket-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .45rem; } .ticket-card { min-height: 7.25rem; background-size: auto, auto, auto, auto, 100% 17px, 100% 17px, auto; } .ticket-card::before { inset: .38rem; border-width: 1px; border-radius: 1rem .18rem 1rem .18rem; } .ticket-card::after { top: .85rem; right: 1.95rem; bottom: .85rem; left: 1.95rem; border-width: 1px; } .ticket-card-header { inset: .44rem .38rem; } .ticket-id { left: .02rem; font-size: .55rem; } .ticket-status { right: .01rem; font-size: .43rem; letter-spacing: .03em; } .ticket-ornament { top: .42rem; right: 2.3rem; bottom: .42rem; left: 2.3rem; } .ticket-ornament::before, .ticket-ornament::after { font-size: .46rem; letter-spacing: .05em; } .ticket-ornament::before, .ticket-ornament::after { content: "— ★ ★ —"; } .ticket-pair { right: 2.2rem; left: 2.2rem; gap: .2rem; } .ticket-pair strong { font-size: clamp(1.35rem, 8vw, 1.85rem); } .ticket-pair span { font-size: .68rem; } .ticket-owner { right: 2.25rem; bottom: 1.25rem; left: 2.25rem; font-size: .5rem; letter-spacing: 0; } .contact-panel { border-radius: .9rem; } .site-footer { align-items: start; flex-direction: column; } }
+@media (max-width: 40rem) { .ticket-select-button { padding: 0 2.2rem .9rem; } .ticket-select-button span { padding: .05rem .32rem; font-size: .43rem; } }
 @media (max-width: 40rem) { .draw-prize-rules, .draw-results { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
 @media (prefers-contrast: more) { :root { --muted: #c5cbe0; --line: #64708e; } }

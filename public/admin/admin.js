@@ -20,10 +20,12 @@ const elements = {
   ticketDialog: document.querySelector('#ticket-dialog'),
   ticketDialogTitle: document.querySelector('#ticket-dialog-title'),
   ticketDialogPair: document.querySelector('#ticket-dialog-pair'),
+  ticketDialogOrigin: document.querySelector('#ticket-dialog-origin'),
   ticketForm: document.querySelector('#ticket-form'),
   releaseTicketButton: document.querySelector('#release-ticket-button'),
   total: document.querySelector('#admin-total'),
-  sold: document.querySelector('#admin-sold'),
+  pending: document.querySelector('#admin-pending'),
+  paid: document.querySelector('#admin-paid'),
   available: document.querySelector('#admin-available'),
   prizeCount: document.querySelector('#admin-prizes'),
   toast: document.querySelector('#admin-toast'),
@@ -115,10 +117,13 @@ function setBusy(form, busy) {
 }
 
 function renderStats() {
-  const sold = state.data.tickets.filter((ticket) => ticket.buyer).length;
+  const occupied = state.data.tickets.filter((ticket) => ticket.buyer);
+  const pending = occupied.filter((ticket) => ticket.buyer.paymentStatus === 'pending').length;
+  const paid = occupied.length - pending;
   elements.total.textContent = String(state.data.tickets.length);
-  elements.sold.textContent = String(sold);
-  elements.available.textContent = String(state.data.tickets.length - sold);
+  elements.pending.textContent = String(pending);
+  elements.paid.textContent = String(paid);
+  elements.available.textContent = String(state.data.tickets.length - occupied.length);
   elements.prizeCount.textContent = String(state.data.prizes.length);
 }
 
@@ -207,7 +212,8 @@ function renderPrizes() {
 
 function ticketMatches(ticket) {
   if (state.ticketFilter === 'available' && ticket.buyer) return false;
-  if (state.ticketFilter === 'sold' && !ticket.buyer) return false;
+  if (state.ticketFilter === 'pending' && ticket.buyer?.paymentStatus !== 'pending') return false;
+  if (state.ticketFilter === 'paid' && (!ticket.buyer || ticket.buyer.paymentStatus === 'pending')) return false;
   if (!state.ticketQuery) return true;
   return [
     ticket.id,
@@ -215,6 +221,7 @@ function ticketMatches(ticket) {
     `${ticket.first} - ${ticket.second}`,
     ticket.buyer?.name || '',
     ticket.buyer?.phone || '',
+    ticket.buyer?.source || '',
   ].join(' ').toLocaleLowerCase('es').includes(state.ticketQuery);
 }
 
@@ -225,6 +232,10 @@ function openTicketDialog(ticket) {
   field(elements.ticketForm, 'name').value = ticket.buyer?.name || '';
   field(elements.ticketForm, 'phone').value = ticket.buyer?.phone || '';
   field(elements.ticketForm, 'notes').value = ticket.buyer?.notes || '';
+  field(elements.ticketForm, 'paymentStatus').value = ticket.buyer?.paymentStatus === 'pending' ? 'pending' : 'paid';
+  elements.ticketDialogOrigin.textContent = ticket.buyer
+    ? `Origen: ${ticket.buyer.source === 'public' ? 'inscripción desde la web' : 'asignación administrativa'}`
+    : 'Ticket libre: la asignación se realizará desde el panel.';
   elements.releaseTicketButton.disabled = !ticket.buyer;
   elements.ticketDialog.showModal();
   field(elements.ticketForm, 'name').focus();
@@ -234,8 +245,9 @@ function renderTickets() {
   const tickets = state.data.tickets.filter(ticketMatches);
   elements.ticketList.replaceChildren();
   for (const ticket of tickets) {
+    const isPending = ticket.buyer?.paymentStatus === 'pending';
     const row = document.createElement('article');
-    row.className = `admin-ticket-row ${ticket.buyer ? 'is-sold' : 'is-available'}`;
+    row.className = `admin-ticket-row ${ticket.buyer ? (isPending ? 'is-pending' : 'is-paid') : 'is-available'}`;
     const edit = document.createElement('button');
     edit.type = 'button';
     edit.className = 'button button-secondary button-small';
@@ -247,6 +259,13 @@ function renderTickets() {
       textElement('strong', 'admin-ticket-pair', `${ticket.first} — ${ticket.second}`),
       textElement('p', 'admin-ticket-buyer', ticket.buyer?.name || 'Disponible'),
       textElement('p', 'admin-ticket-phone', ticket.buyer?.phone || 'Sin teléfono'),
+      textElement(
+        'span',
+        `admin-ticket-payment ${ticket.buyer ? (isPending ? 'is-pending' : 'is-paid') : 'is-available'}`,
+        ticket.buyer
+          ? `${isPending ? 'Pendiente' : 'Pagado'} · ${ticket.buyer.source === 'public' ? 'Web' : 'Admin'}`
+          : 'Disponible',
+      ),
       edit,
     );
     elements.ticketList.append(row);
@@ -398,11 +417,12 @@ elements.ticketForm.addEventListener('submit', async (event) => {
           name: field(elements.ticketForm, 'name').value,
           phone: field(elements.ticketForm, 'phone').value,
           notes: field(elements.ticketForm, 'notes').value,
+          paymentStatus: field(elements.ticketForm, 'paymentStatus').value,
         },
       },
     });
     elements.ticketDialog.close();
-    showToast('Comprador guardado.');
+    showToast('Participante y estado de pago guardados.');
     await loadData();
   } catch (error) {
     showToast(error.message, true);
@@ -413,7 +433,7 @@ elements.ticketForm.addEventListener('submit', async (event) => {
 
 elements.releaseTicketButton.addEventListener('click', async () => {
   const ticketId = field(elements.ticketForm, 'ticketId').value;
-  if (!window.confirm(`¿Dejar ${ticketId} disponible y retirar sus datos de comprador?`)) return;
+  if (!window.confirm(`¿Retirar a la persona de ${ticketId}, borrar sus datos y dejar el ticket disponible?`)) return;
   elements.releaseTicketButton.disabled = true;
   try {
     await api(`/api/admin/tickets/${encodeURIComponent(ticketId)}`, {

@@ -1,6 +1,6 @@
 # Progreso de la rifa
 
-Ultima actualizacion: 2026-08-16
+Ultima actualizacion: 2026-08-17
 
 ## Terminado
 
@@ -91,6 +91,20 @@ Ultima actualizacion: 2026-08-16
   enlaces entre las vistas.
 - [x] La cuadrícula de premios centra automáticamente uno, dos o tres premios
   usando columnas de ancho limitado y conserva el diseño responsive.
+- [x] Se agrego la inscripcion publica desde cada ticket disponible con nombre
+  publico y telefono privado, sin solicitar ni procesar datos de pago.
+- [x] Toda inscripcion publica queda pendiente de pago y muestra ese estado en
+  la pagina; el telefono, las notas y el origen solo aparecen en `/admin`.
+- [x] La reserva comprueba y escribe atomically que el ticket siga libre y que
+  pertenezca a `/1` o `/2`; dos solicitudes simultaneas no pueden adjudicarse
+  el mismo ticket.
+- [x] Se mejoro `/admin` con contadores y filtros de pendientes/pagados, origen
+  Web/Admin, selector de estado y una accion explicita para retirar a la
+  persona, borrar sus datos y liberar el ticket.
+- [x] Se mantuvo compatibilidad con compradores antiguos sin estado guardado,
+  que se interpretan como pagados sin migrar ni regenerar el JSON.
+- [x] Pasan 17 pruebas automatizadas, incluidas inscripcion simultanea,
+  privacidad, pertenencia de vista, confirmacion de pago y liberacion.
 - [ ] Confirmar el dominio definitivo y ejecutar la instalacion en la instancia.
 - [ ] Guardar respaldos periodicos fuera de la instancia Oracle.
 - [ ] Activar `COOKIE_SECURE=true` y `HTTPS_ONLY=true` cuando HTTPS este listo.

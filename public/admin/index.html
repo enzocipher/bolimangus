@@ -6,9 +6,9 @@
     <meta name="robots" content="noindex, nofollow">
     <meta name="theme-color" content="#121d31">
     <title>Administración · Rifa</title>
-    <link rel="stylesheet" href="/styles.css">
-    <link rel="stylesheet" href="/admin/admin.css">
-    <script src="/admin/admin.js?v=2" defer></script>
+    <link rel="stylesheet" href="/styles.css?v=11">
+    <link rel="stylesheet" href="/admin/admin.css?v=3">
+    <script src="/admin/admin.js?v=3" defer></script>
   </head>
   <body class="admin-body">
     <a class="skip-link" href="#admin-main">Saltar al contenido</a>
@@ -69,7 +69,8 @@
               </div>
               <div class="admin-stats">
                 <article><span>Tickets totales</span><strong id="admin-total">106</strong></article>
-                <article><span>Comprados</span><strong id="admin-sold">—</strong></article>
+                <article><span>Pendientes</span><strong id="admin-pending">—</strong></article>
+                <article><span>Pagados</span><strong id="admin-paid">—</strong></article>
                 <article><span>Disponibles</span><strong id="admin-available">—</strong></article>
                 <article><span>Premios</span><strong id="admin-prizes">—</strong></article>
               </div>
@@ -188,7 +189,8 @@
                   <select id="admin-ticket-filter">
                     <option value="all">Todos</option>
                     <option value="available">Disponibles</option>
-                    <option value="sold">Comprados</option>
+                    <option value="pending">Pendientes de pago</option>
+                    <option value="paid">Pagados</option>
                   </select>
                 </label>
               </div>
@@ -209,6 +211,7 @@
       <p class="eyebrow">Asignar participante</p>
       <h2 id="ticket-dialog-title">Editar ticket</h2>
       <p class="dialog-pair" id="ticket-dialog-pair"></p>
+      <p class="dialog-origin" id="ticket-dialog-origin"></p>
       <form class="admin-form" id="ticket-form">
         <input name="ticketId" type="hidden">
         <label class="admin-field">
@@ -220,11 +223,18 @@
           <input name="phone" type="tel" maxlength="40" autocomplete="tel">
         </label>
         <label class="admin-field">
+          <span>Estado del pago</span>
+          <select name="paymentStatus">
+            <option value="pending">Pendiente de pago</option>
+            <option value="paid">Pago confirmado</option>
+          </select>
+        </label>
+        <label class="admin-field">
           <span>Notas privadas</span>
           <textarea name="notes" rows="4" maxlength="500"></textarea>
         </label>
         <div class="form-actions form-actions-between">
-          <button class="button button-danger" id="release-ticket-button" type="button">Dejar disponible</button>
+          <button class="button button-danger" id="release-ticket-button" type="button">Retirar persona y liberar</button>
           <button class="button button-primary" type="submit">Guardar comprador</button>
         </div>
       </form>

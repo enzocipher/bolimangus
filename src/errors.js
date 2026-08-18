@@ -16,6 +16,10 @@ export function notFound(message = 'Recurso no encontrado.') {
   return new AppError(message, { code: 'NOT_FOUND', statusCode: 404 });
 }
 
+export function conflict(message = 'El recurso ya no esta disponible.') {
+  return new AppError(message, { code: 'CONFLICT', statusCode: 409 });
+}
+
 export function isAppError(error) {
   return error instanceof AppError;
 }

@@ -69,6 +69,12 @@ export function validateTickets(tickets) {
           throw new Error(`${ticket.id}.buyer.${field} debe ser texto.`);
         }
       }
+      if (ticket.buyer.paymentStatus !== undefined && !['pending', 'paid'].includes(ticket.buyer.paymentStatus)) {
+        throw new Error(`${ticket.id}.buyer.paymentStatus no es valido.`);
+      }
+      if (ticket.buyer.source !== undefined && !['admin', 'public'].includes(ticket.buyer.source)) {
+        throw new Error(`${ticket.id}.buyer.source no es valido.`);
+      }
     }
   }
 

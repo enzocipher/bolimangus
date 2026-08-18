@@ -43,6 +43,8 @@ describe('almacen JSON', () => {
         name: 'Participante de prueba',
         phone: '999999999',
         notes: 'Dato privado',
+        paymentStatus: 'pending',
+        source: 'public',
         assignedAt: new Date().toISOString(),
       };
     });

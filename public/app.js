@@ -17,6 +17,10 @@ const elements = {
   contacts: document.querySelector('#contact-links'),
   error: document.querySelector('#page-error'),
   pageTicketLabel: document.querySelector('#page-ticket-label'),
+  registrationDialog: document.querySelector('#registration-dialog'),
+  registrationForm: document.querySelector('#registration-form'),
+  registrationPair: document.querySelector('#registration-pair'),
+  registrationStatus: document.querySelector('#registration-status'),
 };
 
 const pageMatch = window.location.pathname.match(/^\/(1|2)\/?$/);
@@ -27,6 +31,7 @@ const state = {
   data: null,
   query: '',
   filter: 'all',
+  selectedTicket: null,
 };
 
 function visibleTickets() {
@@ -42,6 +47,20 @@ function textElement(tag, className, text) {
 
 function formatPair(ticket) {
   return `${ticket.first}-${ticket.second}`;
+}
+
+function paymentStatus(ticket) {
+  return ticket.buyer?.paymentStatus === 'pending' ? 'pending' : 'paid';
+}
+
+function openRegistration(ticket) {
+  state.selectedTicket = ticket;
+  elements.registrationPair.textContent = `Números ${ticket.first} — ${ticket.second}`;
+  elements.registrationStatus.textContent = '';
+  elements.registrationStatus.classList.remove('is-error', 'is-success');
+  elements.registrationForm.reset();
+  elements.registrationDialog.showModal();
+  elements.registrationForm.elements.namedItem('name').focus();
 }
 
 function renderStats() {
@@ -112,15 +131,16 @@ function renderTickets() {
   elements.tickets.replaceChildren();
 
   for (const ticket of matches) {
+    const isPending = ticket.buyer && paymentStatus(ticket) === 'pending';
     const article = document.createElement('article');
-    article.className = `ticket-card ${ticket.buyer ? 'is-sold' : 'is-available'}`;
-    article.setAttribute('aria-label', `Números ${ticket.first} y ${ticket.second}, ${ticket.buyer ? `comprado por ${ticket.buyer.name}` : 'disponible'}`);
+    article.className = `ticket-card ${ticket.buyer ? `is-sold ${isPending ? 'is-pending' : 'is-paid'}` : 'is-available'}`;
+    article.setAttribute('aria-label', `Números ${ticket.first} y ${ticket.second}, ${ticket.buyer ? `${isPending ? 'reservado' : 'confirmado'} por ${ticket.buyer.name}` : 'disponible para reservar'}`);
 
     const header = document.createElement('div');
     header.className = 'ticket-card-header';
     header.append(
       textElement('span', 'ticket-id', 'RIFA'),
-      textElement('span', 'ticket-status', ticket.buyer ? 'Comprado' : 'Disponible'),
+      textElement('span', 'ticket-status', ticket.buyer ? (isPending ? 'Pendiente' : 'Confirmado') : 'Disponible'),
     );
 
     const pair = document.createElement('p');
@@ -134,12 +154,18 @@ function renderTickets() {
     const ornament = textElement('span', 'ticket-ornament', '');
     ornament.setAttribute('aria-hidden', 'true');
 
-    const owner = textElement(
-      'p',
-      'ticket-owner',
-      ticket.buyer ? ticket.buyer.name : 'Aún sin participante',
-    );
-    article.append(header, ornament, pair, owner);
+    article.append(header, ornament, pair);
+    if (ticket.buyer) {
+      article.append(textElement('p', 'ticket-owner', ticket.buyer.name));
+    } else {
+      const selectButton = document.createElement('button');
+      selectButton.type = 'button';
+      selectButton.className = 'ticket-select-button';
+      selectButton.setAttribute('aria-label', `Reservar ticket con los números ${ticket.first} y ${ticket.second}`);
+      selectButton.append(textElement('span', '', 'Reservar'));
+      selectButton.addEventListener('click', () => openRegistration(ticket));
+      article.append(selectButton);
+    }
     elements.tickets.append(article);
   }
 
@@ -215,6 +241,53 @@ async function loadData() {
     elements.summary.textContent = 'Información no disponible';
   }
 }
+
+elements.registrationForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  if (!state.selectedTicket) return;
+  const submitButton = elements.registrationForm.querySelector('button[type="submit"]');
+  submitButton.disabled = true;
+  elements.registrationForm.setAttribute('aria-busy', 'true');
+  elements.registrationStatus.textContent = 'Guardando tu reserva…';
+  elements.registrationStatus.classList.remove('is-error', 'is-success');
+
+  try {
+    const response = await fetch(`/api/public/${ticketPage}/tickets/register`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'X-Rifa-Public': '1',
+      },
+      body: JSON.stringify({
+        first: state.selectedTicket.first,
+        second: state.selectedTicket.second,
+        name: elements.registrationForm.elements.namedItem('name').value,
+        phone: elements.registrationForm.elements.namedItem('phone').value,
+      }),
+    });
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload.error?.message || 'No se pudo registrar la reserva.');
+
+    elements.registrationStatus.textContent = '¡Listo! Tu ticket quedó pendiente de verificación de pago.';
+    elements.registrationStatus.classList.add('is-success');
+    await loadData();
+    setTimeout(() => elements.registrationDialog.close(), 1_600);
+  } catch (error) {
+    elements.registrationStatus.textContent = error.message;
+    elements.registrationStatus.classList.add('is-error');
+    await loadData();
+  } finally {
+    submitButton.disabled = false;
+    elements.registrationForm.setAttribute('aria-busy', 'false');
+  }
+});
+
+elements.registrationDialog.addEventListener('close', () => {
+  state.selectedTicket = null;
+  elements.registrationForm.reset();
+  elements.registrationStatus.textContent = '';
+});
 
 elements.search.addEventListener('input', (event) => {
   state.query = event.target.value.trim().toLocaleLowerCase('es');
