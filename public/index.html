@@ -4,10 +4,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Elige tu propio par de números y participa en la rifa.">
+    <meta name="author" content="Doron">
     <meta name="theme-color" content="#0b1020">
     <title>Gran Rifa Especial</title>
-    <link rel="stylesheet" href="/styles.css?v=13">
-    <script src="/app.js?v=13" defer></script>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/styles.css?v=17">
+    <script src="/app.js?v=17" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#contenido">Saltar al contenido</a>
@@ -167,7 +169,23 @@
       <div class="page-error" id="page-error" role="alert" hidden>No pudimos cargar la información. Intenta actualizar la página.</div>
     </main>
 
-    <footer class="site-footer"><p><strong>Rifa especial</strong> · Información administrada directamente por la organización.</p><a href="/admin" rel="nofollow">Administración <span aria-hidden="true">↗</span></a></footer>
+    <footer class="site-footer">
+      <div>
+        <p><strong>Rifa especial</strong> · Información administrada directamente por la organización.</p>
+        <small class="mart-credit">Mart inspirado en <a href="https://nullscape.wiki/Nullscape_Wiki:News" target="_blank" rel="noopener noreferrer">Nullscape Wiki</a> · adaptación interactiva Doron.</small>
+      </div>
+      <a href="/admin" rel="nofollow">Administración <span aria-hidden="true">↗</span></a>
+    </footer>
+
+    <!--
+      Firma digital solicitada: Doron::MartKeeper::v1
+      Mart y GIF original: Nullscape Wiki
+      https://nullscape.wiki/Nullscape_Wiki:News
+      https://static.wikitide.net/nullscapewiki/9/90/Probably_Improper_Speeded_Mart.gif
+    -->
+    <div class="mart-cursor" id="mart-cursor" data-doron-signature="Doron::MartKeeper::v1" aria-hidden="true">
+      <img class="mart-character" src="https://static.wikitide.net/nullscapewiki/9/90/Probably_Improper_Speeded_Mart.gif" alt="" width="64" height="64" draggable="false" referrerpolicy="no-referrer">
+    </div>
     <noscript><p class="noscript-message">Activa JavaScript para elegir tus números y registrar el ticket.</p></noscript>
   </body>
 </html>

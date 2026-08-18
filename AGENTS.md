@@ -67,6 +67,24 @@ numeros y muestra los tickets reservados, informacion, premios y contacto. La ad
 - `/admin` permite ingresar las seis bolillas y busca los tickets que coincidan
   con ambos pares ganadores, mostrando participante y estado de pago.
 
+## Interaccion visual y easter egg de Mart
+
+- La pagina publica usa animaciones ligeras de aparicion, paralaje, brillo y
+  respuesta al puntero sin agregar dependencias ni procesos de compilacion.
+- Mart usa el GIF remoto exacto de Nullscape Wiki
+  `Probably_Improper_Speeded_Mart.gif`: sigue lentamente el puntero en
+  escritorio y queda estatico en dispositivos tactiles o cuando el usuario
+  solicita reducir movimiento.
+- El componente publico lleva la firma exacta `Doron::MartKeeper::v1` tanto en
+  HTML como en JavaScript.
+- Por decision explicita del usuario, eliminar a Mart o cambiar su firma activa
+  un bloqueo de la interfaz publica. Este easter egg nunca debe bloquear
+  `/admin`, el servidor, el JSON ni las tareas de recuperacion.
+- La unica excepcion aprobada a los recursos externos es ese GIF servido desde
+  `https://static.wikitide.net`; la CSP solo permite ese origen para imagenes.
+- Mantener en HTML y JavaScript los creditos y enlaces a Nullscape Wiki y al
+  archivo original. No cargar audio, fuentes ni otros recursos remotos.
+
 ## Migracion aprobada el 2026-08-18
 
 - Se reemplazo el formato fijo de 106 pares por tickets dinamicos en JSON

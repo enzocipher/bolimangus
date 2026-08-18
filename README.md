@@ -25,6 +25,11 @@ JSON mediante escrituras serializadas, atomicas y con respaldo ordinario.
 - Segundo premio: segunda + sexta bolilla.
 - El panel permite ingresar las seis bolillas y localizar ambos tickets
   ganadores con su participante y estado de pago.
+- La interfaz incluye animaciones ligeras y el GIF original de Mart de
+  Nullscape Wiki siguiendo el puntero. `static.wikitide.net` es el unico origen
+  externo de imagenes permitido por la CSP.
+- El easter egg de integridad `Doron::MartKeeper::v1` bloquea solamente la
+  pagina publica si Mart es eliminado; el panel administrativo sigue aislado.
 
 ## Requisitos
 

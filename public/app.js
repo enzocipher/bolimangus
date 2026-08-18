@@ -1,3 +1,60 @@
+// Firma digital del easter egg: si Mart desaparece, la pagina publica se bloquea.
+// Credito: Mart y el GIF original pertenecen a Nullscape Wiki.
+// https://nullscape.wiki/Nullscape_Wiki:News
+// https://static.wikitide.net/nullscapewiki/9/90/Probably_Improper_Speeded_Mart.gif
+const DORON_MART_SIGNATURE = 'Doron::MartKeeper::v1';
+const MART_IMAGE_SOURCE = 'https://static.wikitide.net/nullscapewiki/9/90/Probably_Improper_Speeded_Mart.gif';
+const martCursor = document.querySelector('#mart-cursor');
+const martImage = martCursor?.querySelector('.mart-character');
+let martIntegrityLocked = false;
+
+function lockPublicPageForMart() {
+  if (martIntegrityLocked) return;
+  martIntegrityLocked = true;
+  document.documentElement.classList.add('mart-integrity-failed');
+  const blocker = document.createElement('div');
+  blocker.className = 'mart-integrity-lock';
+  blocker.setAttribute('role', 'alert');
+  const title = document.createElement('strong');
+  title.textContent = 'Mart ha desaparecido.';
+  const detail = document.createElement('span');
+  detail.textContent = 'La firma digital de Doron no coincide. Restaura a Mart para continuar.';
+  blocker.append(title, detail);
+  blocker.tabIndex = -1;
+  Array.from(document.body.children).forEach((child) => { child.inert = true; });
+  document.body.append(blocker);
+  blocker.focus();
+}
+
+if (!martCursor || martCursor.dataset.doronSignature !== DORON_MART_SIGNATURE) {
+  lockPublicPageForMart();
+  throw new Error('Doron Mart integrity check failed.');
+}
+
+if (!martImage || martImage.getAttribute('src') !== MART_IMAGE_SOURCE) {
+  lockPublicPageForMart();
+  throw new Error('Doron Mart image check failed.');
+}
+martImage.addEventListener('error', lockPublicPageForMart, { once: true });
+if (martImage.complete && martImage.naturalWidth === 0) {
+  lockPublicPageForMart();
+  throw new Error('Doron Mart image failed to load.');
+}
+
+const martIntegrityObserver = new MutationObserver(() => {
+  if (
+    !document.body.contains(martCursor)
+    || !martCursor.contains(martImage)
+    || martCursor.dataset.doronSignature !== DORON_MART_SIGNATURE
+    || martImage.getAttribute('src') !== MART_IMAGE_SOURCE
+  ) {
+    lockPublicPageForMart();
+  }
+});
+martIntegrityObserver.observe(document.body, { childList: true, subtree: true });
+martIntegrityObserver.observe(martCursor, { attributes: true, attributeFilter: ['data-doron-signature'] });
+martIntegrityObserver.observe(martImage, { attributes: true, attributeFilter: ['src'] });
+
 const elements = {
   title: document.querySelector('#raffle-title'),
   subtitle: document.querySelector('#raffle-subtitle'),
@@ -15,18 +72,138 @@ const elements = {
   secondNumber: document.querySelector('#second-number'),
   chosenFirst: document.querySelector('#chosen-first'),
   chosenSecond: document.querySelector('#chosen-second'),
+  pairPreview: document.querySelector('.choice-pair'),
   tickets: document.querySelector('#ticket-grid'),
   ticketSearch: document.querySelector('#ticket-search'),
   ticketEmpty: document.querySelector('#ticket-empty'),
 };
 
 const state = { data: null, ticketQuery: '', ticketFilter: 'all' };
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+const interactivePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+let revealObserver;
 
 function textElement(tag, className, text) {
   const element = document.createElement(tag);
   if (className) element.className = className;
   element.textContent = text;
   return element;
+}
+
+function registerRevealTargets(root = document) {
+  const targets = root.querySelectorAll([
+    '.hero-copy > *',
+    '.section-heading',
+    '.participation-steps li',
+    '.draw-mode',
+    '.prize-card',
+    '.choice-layout',
+    '.ticket-toolbar',
+    '.ticket-card',
+    '.contact-panel',
+    '.terms',
+  ].join(','));
+
+  targets.forEach((target, index) => {
+    if (target.dataset.revealReady) return;
+    target.dataset.revealReady = 'true';
+    target.style.setProperty('--reveal-delay', `${Math.min(index % 6, 5) * 65}ms`);
+    if (!revealObserver) {
+      target.classList.add('is-visible');
+      return;
+    }
+    revealObserver.observe(target);
+  });
+}
+
+function initializeRevealAnimations() {
+  if (reducedMotion.matches || !('IntersectionObserver' in window)) {
+    registerRevealTargets();
+    return;
+  }
+  revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('is-visible');
+      revealObserver.unobserve(entry.target);
+    });
+  }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+  registerRevealTargets();
+}
+
+function initializeHeroMotion() {
+  const heroVisual = document.querySelector('.hero-visual');
+  if (!heroVisual || reducedMotion.matches || !interactivePointer.matches) return;
+  heroVisual.classList.add('is-interactive');
+  heroVisual.addEventListener('pointermove', (event) => {
+    const bounds = heroVisual.getBoundingClientRect();
+    const horizontal = ((event.clientX - bounds.left) / bounds.width) - 0.5;
+    const vertical = ((event.clientY - bounds.top) / bounds.height) - 0.5;
+    heroVisual.style.setProperty('--hero-rotate-x', `${vertical * -7}deg`);
+    heroVisual.style.setProperty('--hero-rotate-y', `${horizontal * 9}deg`);
+    heroVisual.style.setProperty('--hero-shift-x', `${horizontal * 12}px`);
+    heroVisual.style.setProperty('--hero-shift-y', `${vertical * 10}px`);
+  }, { passive: true });
+  heroVisual.addEventListener('pointerleave', () => {
+    heroVisual.style.removeProperty('--hero-rotate-x');
+    heroVisual.style.removeProperty('--hero-rotate-y');
+    heroVisual.style.removeProperty('--hero-shift-x');
+    heroVisual.style.removeProperty('--hero-shift-y');
+  });
+}
+
+function initializeTicketTilt() {
+  if (reducedMotion.matches || !interactivePointer.matches) return;
+  elements.tickets.addEventListener('pointermove', (event) => {
+    const ticket = event.target.closest('.ticket-card');
+    if (!ticket) return;
+    const bounds = ticket.getBoundingClientRect();
+    const horizontal = ((event.clientX - bounds.left) / bounds.width) - 0.5;
+    const vertical = ((event.clientY - bounds.top) / bounds.height) - 0.5;
+    ticket.style.setProperty('--ticket-rotate-x', `${vertical * -7}deg`);
+    ticket.style.setProperty('--ticket-rotate-y', `${horizontal * 9}deg`);
+    ticket.style.setProperty('--ticket-glow-x', `${(horizontal + 0.5) * 100}%`);
+    ticket.style.setProperty('--ticket-glow-y', `${(vertical + 0.5) * 100}%`);
+  }, { passive: true });
+  elements.tickets.addEventListener('pointerout', (event) => {
+    const ticket = event.target.closest('.ticket-card');
+    if (!ticket || ticket.contains(event.relatedTarget)) return;
+    ticket.style.removeProperty('--ticket-rotate-x');
+    ticket.style.removeProperty('--ticket-rotate-y');
+    ticket.style.removeProperty('--ticket-glow-x');
+    ticket.style.removeProperty('--ticket-glow-y');
+  });
+}
+
+function initializeMartFollower() {
+  const staticPosition = () => {
+    martCursor.style.transform = 'translate3d(calc(100vw - 3.5rem), calc(100vh - 4.5rem), 0)';
+    martCursor.classList.add('is-visible', 'is-static');
+  };
+  if (reducedMotion.matches || !interactivePointer.matches) {
+    staticPosition();
+    return;
+  }
+
+  let currentX = window.innerWidth * 0.82;
+  let currentY = window.innerHeight * 0.72;
+  let targetX = window.innerWidth * 0.5;
+  let targetY = window.innerHeight * 0.45;
+
+  document.addEventListener('pointermove', (event) => {
+    targetX = event.clientX;
+    targetY = event.clientY;
+  }, { passive: true });
+
+  function followPointer() {
+    currentX += (targetX - currentX) * 0.018;
+    currentY += (targetY - currentY) * 0.018;
+    martCursor.style.transform = `translate3d(calc(${currentX}px - 50%), calc(${currentY}px - 50%), 0)`;
+    requestAnimationFrame(followPointer);
+  }
+
+  martCursor.classList.add('is-visible');
+  requestAnimationFrame(followPointer);
 }
 
 function populateNumberSelect(select) {
@@ -41,6 +218,8 @@ function populateNumberSelect(select) {
 function updatePairPreview() {
   elements.chosenFirst.textContent = elements.firstNumber.value || '—';
   elements.chosenSecond.textContent = elements.secondNumber.value || '—';
+  elements.pairPreview.classList.remove('is-updating');
+  requestAnimationFrame(() => elements.pairPreview.classList.add('is-updating'));
   const duplicate = elements.firstNumber.value && elements.firstNumber.value === elements.secondNumber.value;
   elements.secondNumber.setCustomValidity(duplicate ? 'Los dos números deben ser distintos.' : '');
 }
@@ -83,6 +262,7 @@ function renderPrizes() {
     article.append(media, copy);
     elements.prizes.append(article);
   });
+  registerRevealTargets(elements.prizes);
 }
 
 function contactLink(label, href, detail) {
@@ -178,6 +358,7 @@ function renderTickets() {
 
   elements.tickets.replaceChildren(...cards);
   elements.ticketEmpty.hidden = cards.length > 0;
+  registerRevealTargets(elements.tickets);
 }
 
 async function loadData() {
@@ -254,4 +435,8 @@ document.querySelectorAll('input[name="ticket-filter"]').forEach((input) => {
     renderTickets();
   });
 });
+initializeRevealAnimations();
+initializeHeroMotion();
+initializeTicketTilt();
+initializeMartFollower();
 void loadData();
