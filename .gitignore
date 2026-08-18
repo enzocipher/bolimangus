@@ -3,6 +3,7 @@ node_modules/
 data/rifa.json
 data/rifa.backup.json
 data/rifa.pre-regeneracion-*.json
+data/rifa.pre-tickets-dinamicos-*.json
 data/*.tmp
 data/temp-uploads/
 public/uploads/*

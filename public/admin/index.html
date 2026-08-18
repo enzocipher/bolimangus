@@ -6,9 +6,9 @@
     <meta name="robots" content="noindex, nofollow">
     <meta name="theme-color" content="#121d31">
     <title>Administración · Rifa</title>
-    <link rel="stylesheet" href="/styles.css?v=11">
-    <link rel="stylesheet" href="/admin/admin.css?v=3">
-    <script src="/admin/admin.js?v=3" defer></script>
+    <link rel="stylesheet" href="/styles.css?v=12">
+    <link rel="stylesheet" href="/admin/admin.css?v=4">
+    <script src="/admin/admin.js?v=4" defer></script>
   </head>
   <body class="admin-body">
     <a class="skip-link" href="#admin-main">Saltar al contenido</a>
@@ -17,7 +17,7 @@
       <section class="login-shell" id="login-view" aria-labelledby="login-title">
         <div class="login-card">
           <a class="brand" href="/">
-            <span class="brand-mark" aria-hidden="true">R</span>
+            <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M4 5.5h16v4a2.5 2.5 0 0 0 0 5v4H4v-4a2.5 2.5 0 0 0 0-5v-4Z"/><path d="M9 8v8"/></svg></span>
             <span>Volver a la rifa</span>
           </a>
           <p class="eyebrow">Panel privado</p>
@@ -37,7 +37,7 @@
       <div class="admin-app" id="dashboard-view" hidden>
         <header class="admin-header">
           <a class="brand" href="/">
-            <span class="brand-mark" aria-hidden="true">R</span>
+            <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M4 5.5h16v4a2.5 2.5 0 0 0 0 5v4H4v-4a2.5 2.5 0 0 0 0-5v-4Z"/><path d="M9 8v8"/></svg></span>
             <span>Rifa especial</span>
           </a>
           <div class="admin-header-actions">
@@ -53,6 +53,7 @@
               <a href="#resumen">Resumen</a>
               <a href="#informacion">Información</a>
               <a href="#premios-admin">Premios</a>
+              <a href="#verificar-sorteo">Verificar sorteo</a>
               <a href="#tickets-admin">Tickets</a>
             </nav>
             <p class="sidebar-note">Los pares de números están protegidos y no pueden editarse desde este panel.</p>
@@ -68,10 +69,9 @@
                 <button class="button button-secondary button-small" id="refresh-button" type="button">Actualizar datos</button>
               </div>
               <div class="admin-stats">
-                <article><span>Tickets totales</span><strong id="admin-total">106</strong></article>
+                <article><span>Tickets totales</span><strong id="admin-total">—</strong></article>
                 <article><span>Pendientes</span><strong id="admin-pending">—</strong></article>
                 <article><span>Pagados</span><strong id="admin-paid">—</strong></article>
-                <article><span>Disponibles</span><strong id="admin-available">—</strong></article>
                 <article><span>Premios</span><strong id="admin-prizes">—</strong></article>
               </div>
             </section>
@@ -172,23 +172,42 @@
               <div class="admin-prize-list" id="admin-prize-list"></div>
             </section>
 
+            <section class="admin-section" id="verificar-sorteo" aria-labelledby="draw-check-title">
+              <div class="admin-section-heading">
+                <div><p class="eyebrow">Resultado oficial</p><h2 id="draw-check-title">Verificar ganadores de la Tinka</h2></div>
+              </div>
+              <form class="admin-form draw-check-form" id="draw-check-form">
+                <p>Ingresa las seis bolillas en el orden oficial. Se buscarán automáticamente los pares 1.ª + 5.ª y 2.ª + 6.ª.</p>
+                <fieldset class="draw-inputs">
+                  <legend>Seis bolillas ordenadas</legend>
+                  <label><span>1.ª</span><input name="ball1" type="number" min="1" max="53" required inputmode="numeric"></label>
+                  <label><span>2.ª</span><input name="ball2" type="number" min="1" max="53" required inputmode="numeric"></label>
+                  <label><span>3.ª</span><input name="ball3" type="number" min="1" max="53" required inputmode="numeric"></label>
+                  <label><span>4.ª</span><input name="ball4" type="number" min="1" max="53" required inputmode="numeric"></label>
+                  <label><span>5.ª</span><input name="ball5" type="number" min="1" max="53" required inputmode="numeric"></label>
+                  <label><span>6.ª</span><input name="ball6" type="number" min="1" max="53" required inputmode="numeric"></label>
+                </fieldset>
+                <button class="button button-primary" type="submit">Buscar tickets ganadores</button>
+                <div class="draw-check-result" id="draw-check-result" aria-live="polite"></div>
+              </form>
+            </section>
+
             <section class="admin-section" id="tickets-admin" aria-labelledby="admin-tickets-title">
               <div class="admin-section-heading">
                 <div>
-                  <p class="eyebrow">106 pares protegidos</p>
-                  <h2 id="admin-tickets-title">Tickets y compradores</h2>
+                  <p class="eyebrow">Pares elegidos por participantes</p>
+                  <h2 id="admin-tickets-title">Tickets reservados</h2>
                 </div>
               </div>
               <div class="admin-ticket-toolbar">
                 <label class="admin-field" for="admin-ticket-search">
                   <span>Buscar</span>
-                  <input id="admin-ticket-search" type="search" placeholder="T001, 23-25, nombre o teléfono">
+                  <input id="admin-ticket-search" type="search" placeholder="23-25, identificador, nombre o teléfono">
                 </label>
                 <label class="admin-field" for="admin-ticket-filter">
                   <span>Estado</span>
                   <select id="admin-ticket-filter">
                     <option value="all">Todos</option>
-                    <option value="available">Disponibles</option>
                     <option value="pending">Pendientes de pago</option>
                     <option value="paid">Pagados</option>
                   </select>
@@ -208,14 +227,14 @@
       <form method="dialog" class="dialog-close-form">
         <button type="submit" class="icon-button" aria-label="Cerrar">×</button>
       </form>
-      <p class="eyebrow">Asignar participante</p>
+      <p class="eyebrow">Gestionar participante</p>
       <h2 id="ticket-dialog-title">Editar ticket</h2>
       <p class="dialog-pair" id="ticket-dialog-pair"></p>
       <p class="dialog-origin" id="ticket-dialog-origin"></p>
       <form class="admin-form" id="ticket-form">
         <input name="ticketId" type="hidden">
         <label class="admin-field">
-          <span>Nombre público del comprador</span>
+          <span>Nombre del participante</span>
           <input name="name" required maxlength="100" autocomplete="name">
         </label>
         <label class="admin-field">
@@ -234,7 +253,7 @@
           <textarea name="notes" rows="4" maxlength="500"></textarea>
         </label>
         <div class="form-actions form-actions-between">
-          <button class="button button-danger" id="release-ticket-button" type="button">Retirar persona y liberar</button>
+          <button class="button button-danger" id="release-ticket-button" type="button">Eliminar ticket y participante</button>
           <button class="button button-primary" type="submit">Guardar comprador</button>
         </div>
       </form>

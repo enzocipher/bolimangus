@@ -6,37 +6,21 @@ const elements = {
   price: document.querySelector('#raffle-price'),
   terms: document.querySelector('#raffle-terms'),
   contactButton: document.querySelector('#hero-contact'),
-  total: document.querySelector('#stat-total'),
-  available: document.querySelector('#stat-available'),
-  sold: document.querySelector('#stat-sold'),
   prizes: document.querySelector('#prize-grid'),
-  tickets: document.querySelector('#ticket-grid'),
-  search: document.querySelector('#ticket-search'),
-  summary: document.querySelector('#results-summary'),
-  empty: document.querySelector('#ticket-empty'),
   contacts: document.querySelector('#contact-links'),
   error: document.querySelector('#page-error'),
-  pageTicketLabel: document.querySelector('#page-ticket-label'),
-  registrationDialog: document.querySelector('#registration-dialog'),
   registrationForm: document.querySelector('#registration-form'),
-  registrationPair: document.querySelector('#registration-pair'),
   registrationStatus: document.querySelector('#registration-status'),
+  firstNumber: document.querySelector('#first-number'),
+  secondNumber: document.querySelector('#second-number'),
+  chosenFirst: document.querySelector('#chosen-first'),
+  chosenSecond: document.querySelector('#chosen-second'),
+  tickets: document.querySelector('#ticket-grid'),
+  ticketSearch: document.querySelector('#ticket-search'),
+  ticketEmpty: document.querySelector('#ticket-empty'),
 };
 
-const pageMatch = window.location.pathname.match(/^\/(1|2)\/?$/);
-const ticketPage = pageMatch ? Number(pageMatch[1]) : 1;
-const ticketsPerPage = 53;
-
-const state = {
-  data: null,
-  query: '',
-  filter: 'all',
-  selectedTicket: null,
-};
-
-function visibleTickets() {
-  return state.data.tickets;
-}
+const state = { data: null, ticketQuery: '', ticketFilter: 'all' };
 
 function textElement(tag, className, text) {
   const element = document.createElement(tag);
@@ -45,30 +29,20 @@ function textElement(tag, className, text) {
   return element;
 }
 
-function formatPair(ticket) {
-  return `${ticket.first}-${ticket.second}`;
+function populateNumberSelect(select) {
+  for (let number = 1; number <= 53; number += 1) {
+    const option = document.createElement('option');
+    option.value = String(number);
+    option.textContent = String(number).padStart(2, '0');
+    select.append(option);
+  }
 }
 
-function paymentStatus(ticket) {
-  return ticket.buyer?.paymentStatus === 'pending' ? 'pending' : 'paid';
-}
-
-function openRegistration(ticket) {
-  state.selectedTicket = ticket;
-  elements.registrationPair.textContent = `Números ${ticket.first} — ${ticket.second}`;
-  elements.registrationStatus.textContent = '';
-  elements.registrationStatus.classList.remove('is-error', 'is-success');
-  elements.registrationForm.reset();
-  elements.registrationDialog.showModal();
-  elements.registrationForm.elements.namedItem('name').focus();
-}
-
-function renderStats() {
-  const tickets = visibleTickets();
-  const sold = tickets.filter((ticket) => ticket.buyer).length;
-  elements.total.textContent = String(tickets.length);
-  elements.sold.textContent = String(sold);
-  elements.available.textContent = String(tickets.length - sold);
+function updatePairPreview() {
+  elements.chosenFirst.textContent = elements.firstNumber.value || '—';
+  elements.chosenSecond.textContent = elements.secondNumber.value || '—';
+  const duplicate = elements.firstNumber.value && elements.firstNumber.value === elements.secondNumber.value;
+  elements.secondNumber.setCustomValidity(duplicate ? 'Los dos números deben ser distintos.' : '');
 }
 
 function renderPrizes() {
@@ -81,7 +55,6 @@ function renderPrizes() {
   state.data.prizes.forEach((prize, index) => {
     const article = document.createElement('article');
     article.className = 'prize-card';
-
     const media = document.createElement('div');
     media.className = 'prize-media';
     if (prize.imageUrl) {
@@ -110,67 +83,6 @@ function renderPrizes() {
     article.append(media, copy);
     elements.prizes.append(article);
   });
-}
-
-function matchesTicket(ticket) {
-  if (state.filter === 'available' && ticket.buyer) return false;
-  if (state.filter === 'sold' && !ticket.buyer) return false;
-  if (!state.query) return true;
-
-  const haystack = [
-    ticket.id || '',
-    formatPair(ticket),
-    `${ticket.first} - ${ticket.second}`,
-    ticket.buyer?.name || '',
-  ].join(' ').toLocaleLowerCase('es');
-  return haystack.includes(state.query);
-}
-
-function renderTickets() {
-  const matches = visibleTickets().filter(matchesTicket);
-  elements.tickets.replaceChildren();
-
-  for (const ticket of matches) {
-    const isPending = ticket.buyer && paymentStatus(ticket) === 'pending';
-    const article = document.createElement('article');
-    article.className = `ticket-card ${ticket.buyer ? `is-sold ${isPending ? 'is-pending' : 'is-paid'}` : 'is-available'}`;
-    article.setAttribute('aria-label', `Números ${ticket.first} y ${ticket.second}, ${ticket.buyer ? `${isPending ? 'reservado' : 'confirmado'} por ${ticket.buyer.name}` : 'disponible para reservar'}`);
-
-    const header = document.createElement('div');
-    header.className = 'ticket-card-header';
-    header.append(
-      textElement('span', 'ticket-id', 'RIFA'),
-      textElement('span', 'ticket-status', ticket.buyer ? (isPending ? 'Pendiente' : 'Confirmado') : 'Disponible'),
-    );
-
-    const pair = document.createElement('p');
-    pair.className = 'ticket-pair';
-    pair.append(
-      textElement('strong', '', String(ticket.first)),
-      textElement('span', '', '—'),
-      textElement('strong', '', String(ticket.second)),
-    );
-
-    const ornament = textElement('span', 'ticket-ornament', '');
-    ornament.setAttribute('aria-hidden', 'true');
-
-    article.append(header, ornament, pair);
-    if (ticket.buyer) {
-      article.append(textElement('p', 'ticket-owner', ticket.buyer.name));
-    } else {
-      const selectButton = document.createElement('button');
-      selectButton.type = 'button';
-      selectButton.className = 'ticket-select-button';
-      selectButton.setAttribute('aria-label', `Reservar ticket con los números ${ticket.first} y ${ticket.second}`);
-      selectButton.append(textElement('span', '', 'Reservar'));
-      selectButton.addEventListener('click', () => openRegistration(ticket));
-      article.append(selectButton);
-    }
-    elements.tickets.append(article);
-  }
-
-  elements.summary.textContent = `${matches.length} ${matches.length === 1 ? 'ticket encontrado' : 'tickets encontrados'}`;
-  elements.empty.hidden = matches.length > 0;
 }
 
 function contactLink(label, href, detail) {
@@ -205,7 +117,6 @@ function renderContacts() {
       links.push(link);
     }
   }
-
   elements.contacts.replaceChildren(...(links.length
     ? links
     : [textElement('span', 'contact-placeholder', 'Los datos de contacto se publicarán próximamente.')]));
@@ -214,9 +125,8 @@ function renderContacts() {
 function renderRaffle() {
   const raffle = state.data.raffle;
   document.title = raffle.title;
-  elements.pageTicketLabel.textContent = `Sorteo activo · ${ticketsPerPage} tickets`;
   elements.title.textContent = raffle.title;
-  elements.subtitle.textContent = raffle.subtitle || 'Dos números, una oportunidad para ganar.';
+  elements.subtitle.textContent = raffle.subtitle || 'Elige dos números distintos del 1 al 53.';
   elements.description.textContent = raffle.description;
   elements.date.textContent = raffle.drawDate || 'Por confirmar';
   elements.price.textContent = raffle.ticketPrice
@@ -225,34 +135,81 @@ function renderRaffle() {
   elements.terms.textContent = raffle.terms || 'La información definitiva se publicará próximamente.';
 }
 
+function renderTickets() {
+  const normalizedQuery = state.ticketQuery.trim().toLocaleLowerCase('es');
+  const visibleTickets = state.data.tickets.filter((ticket) => {
+    if (state.ticketFilter !== 'all' && ticket.buyer.paymentStatus !== state.ticketFilter) return false;
+    if (!normalizedQuery) return true;
+    const directPair = `${ticket.first}-${ticket.second}`;
+    const inversePair = `${ticket.second}-${ticket.first}`;
+    return directPair.includes(normalizedQuery)
+      || inversePair.includes(normalizedQuery)
+      || ticket.buyer.name.toLocaleLowerCase('es').includes(normalizedQuery);
+  });
+
+  const cards = visibleTickets.map((ticket) => {
+    const pending = ticket.buyer.paymentStatus === 'pending';
+    const article = document.createElement('article');
+    article.className = `ticket-card is-sold ${pending ? 'is-pending' : 'is-paid'}`;
+    article.setAttribute('aria-label', `Ticket ${ticket.first} y ${ticket.second}, ${ticket.buyer.name}, ${pending ? 'pendiente de pago' : 'pago confirmado'}`);
+
+    const header = document.createElement('div');
+    header.className = 'ticket-card-header';
+    header.append(
+      textElement('span', 'ticket-id', 'RIFA'),
+      textElement('span', 'ticket-status', pending ? 'Pendiente' : 'Confirmado'),
+    );
+
+    const ornament = document.createElement('span');
+    ornament.className = 'ticket-ornament';
+    ornament.setAttribute('aria-hidden', 'true');
+
+    const pair = document.createElement('div');
+    pair.className = 'ticket-pair';
+    pair.append(
+      textElement('strong', '', String(ticket.first).padStart(2, '0')),
+      textElement('span', '', '—'),
+      textElement('strong', '', String(ticket.second).padStart(2, '0')),
+    );
+
+    article.append(header, ornament, pair, textElement('p', 'ticket-owner', ticket.buyer.name));
+    return article;
+  });
+
+  elements.tickets.replaceChildren(...cards);
+  elements.ticketEmpty.hidden = cards.length > 0;
+}
+
 async function loadData() {
   try {
-    const response = await fetch(`/api/public/${ticketPage}`, { headers: { Accept: 'application/json' } });
+    const response = await fetch('/api/public', { headers: { Accept: 'application/json' } });
     if (!response.ok) throw new Error('No se pudo cargar la rifa.');
     state.data = await response.json();
     renderRaffle();
-    renderStats();
     renderPrizes();
     renderContacts();
     renderTickets();
   } catch (error) {
     console.error(error);
     elements.error.hidden = false;
-    elements.summary.textContent = 'Información no disponible';
   }
 }
 
 elements.registrationForm.addEventListener('submit', async (event) => {
   event.preventDefault();
-  if (!state.selectedTicket) return;
+  updatePairPreview();
+  if (!elements.registrationForm.reportValidity()) return;
+
   const submitButton = elements.registrationForm.querySelector('button[type="submit"]');
+  const first = Number(elements.firstNumber.value);
+  const second = Number(elements.secondNumber.value);
   submitButton.disabled = true;
   elements.registrationForm.setAttribute('aria-busy', 'true');
   elements.registrationStatus.textContent = 'Guardando tu reserva…';
   elements.registrationStatus.classList.remove('is-error', 'is-success');
 
   try {
-    const response = await fetch(`/api/public/${ticketPage}/tickets/register`, {
+    const response = await fetch('/api/public/tickets/register', {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -260,8 +217,8 @@ elements.registrationForm.addEventListener('submit', async (event) => {
         'X-Rifa-Public': '1',
       },
       body: JSON.stringify({
-        first: state.selectedTicket.first,
-        second: state.selectedTicket.second,
+        first,
+        second,
         name: elements.registrationForm.elements.namedItem('name').value,
         phone: elements.registrationForm.elements.namedItem('phone').value,
       }),
@@ -269,36 +226,32 @@ elements.registrationForm.addEventListener('submit', async (event) => {
     const payload = await response.json();
     if (!response.ok) throw new Error(payload.error?.message || 'No se pudo registrar la reserva.');
 
-    elements.registrationStatus.textContent = '¡Listo! Tu ticket quedó pendiente de verificación de pago.';
+    elements.registrationForm.reset();
+    updatePairPreview();
+    elements.registrationStatus.textContent = `¡Listo! El ticket ${first}—${second} quedó pendiente de verificación de pago.`;
     elements.registrationStatus.classList.add('is-success');
     await loadData();
-    setTimeout(() => elements.registrationDialog.close(), 1_600);
   } catch (error) {
     elements.registrationStatus.textContent = error.message;
     elements.registrationStatus.classList.add('is-error');
-    await loadData();
   } finally {
     submitButton.disabled = false;
     elements.registrationForm.setAttribute('aria-busy', 'false');
   }
 });
 
-elements.registrationDialog.addEventListener('close', () => {
-  state.selectedTicket = null;
-  elements.registrationForm.reset();
-  elements.registrationStatus.textContent = '';
+populateNumberSelect(elements.firstNumber);
+populateNumberSelect(elements.secondNumber);
+elements.firstNumber.addEventListener('change', updatePairPreview);
+elements.secondNumber.addEventListener('change', updatePairPreview);
+elements.ticketSearch.addEventListener('input', (event) => {
+  state.ticketQuery = event.target.value;
+  renderTickets();
 });
-
-elements.search.addEventListener('input', (event) => {
-  state.query = event.target.value.trim().toLocaleLowerCase('es');
-  if (state.data) renderTickets();
-});
-
 document.querySelectorAll('input[name="ticket-filter"]').forEach((input) => {
   input.addEventListener('change', (event) => {
-    state.filter = event.target.value;
-    if (state.data) renderTickets();
+    state.ticketFilter = event.target.value;
+    renderTickets();
   });
 });
-
 void loadData();

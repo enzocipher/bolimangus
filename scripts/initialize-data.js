@@ -6,4 +6,4 @@ const store = new JsonStore(filePath);
 const data = await store.init();
 
 console.log(`Datos verificados en ${filePath}`);
-console.log(`${data.tickets.length} tickets listos; los pares existentes no fueron regenerados.`);
+console.log(`${data.tickets.length} tickets reservados; los pares existentes no fueron modificados.`);

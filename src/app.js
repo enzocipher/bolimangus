@@ -17,6 +17,7 @@ import {
   verifySessionToken,
 } from './auth.js';
 import { cleanBuyer, cleanPrize, cleanPublicBuyer, cleanRaffleSettings } from './validation.js';
+import { MAX_NUMBER, MIN_NUMBER, samePair } from './tickets.js';
 
 function asyncHandler(handler) {
   return (request, response, next) => Promise.resolve(handler(request, response, next)).catch(next);
@@ -27,24 +28,14 @@ function publicData(data) {
     raffle: data.raffle,
     prizes: data.prizes,
     tickets: data.tickets.map((ticket) => ({
-      id: ticket.id,
       first: ticket.first,
       second: ticket.second,
-      buyer: ticket.buyer ? {
+      buyer: {
         name: ticket.buyer.name,
-        paymentStatus: ticket.buyer.paymentStatus || 'paid',
-      } : null,
+        paymentStatus: ticket.buyer.paymentStatus,
+      },
     })),
     updatedAt: data.updatedAt,
-  };
-}
-
-function publicPageData(data, page) {
-  const result = publicData(data);
-  const start = (page - 1) * 53;
-  return {
-    ...result,
-    tickets: result.tickets.slice(start, start + 53).map(({ id, ...ticket }) => ticket),
   };
 }
 
@@ -207,39 +198,29 @@ export async function createApp({ config, store = new JsonStore(config.dataFile)
     response.json(publicData(store.getData()));
   });
 
-  app.get('/api/public/:page', (request, response) => {
-    const page = Number(request.params.page);
-    if (page !== 1 && page !== 2) {
-      response.status(404).json({ error: { code: 'NOT_FOUND', message: 'Ruta no encontrada.' } });
-      return;
-    }
-    response.setHeader('Cache-Control', 'no-store');
-    response.json(publicPageData(store.getData(), page));
-  });
-
-  app.post('/api/public/:page/tickets/register', requirePublicRequest, asyncHandler(async (request, response) => {
-    const page = Number(request.params.page);
-    if (page !== 1 && page !== 2) throw notFound('La vista de tickets no existe.');
-
+  app.post('/api/public/tickets/register', requirePublicRequest, asyncHandler(async (request, response) => {
     const first = Number(request.body?.first);
     const second = Number(request.body?.second);
     if (!Number.isInteger(first) || !Number.isInteger(second)
-      || first < 1 || first > 53 || second < 1 || second > 53 || first === second) {
-      throw validationError('El par de numeros enviado no es valido.');
+      || first < MIN_NUMBER || first > MAX_NUMBER
+      || second < MIN_NUMBER || second > MAX_NUMBER
+      || first === second) {
+      throw validationError(`Elige dos numeros distintos entre ${MIN_NUMBER} y ${MAX_NUMBER}.`);
     }
     const buyer = cleanPublicBuyer(request.body);
 
     const ticket = await store.update((data) => {
-      const start = (page - 1) * 53;
-      const pageTickets = data.tickets.slice(start, start + 53);
-      const found = pageTickets.find((item) => (
-        (item.first === first && item.second === second)
-        || (item.first === second && item.second === first)
-      ));
-      if (!found) throw notFound('Ese ticket no pertenece a esta vista de la rifa.');
-      if (found.buyer) throw conflict('Ese ticket acaba de ser reservado. Elige otro disponible.');
-      found.buyer = buyer;
-      return found;
+      if (data.tickets.some((item) => samePair(item, first, second))) {
+        throw conflict('Ese par ya fue reservado, incluso en el orden inverso. Elige otro.');
+      }
+      const created = {
+        id: `T-${randomUUID().slice(0, 8).toUpperCase()}`,
+        first,
+        second,
+        buyer,
+      };
+      data.tickets.push(created);
+      return created;
     });
 
     response.status(201).json({
@@ -300,10 +281,15 @@ export async function createApp({ config, store = new JsonStore(config.dataFile)
 
   app.patch('/api/admin/tickets/:ticketId', requireAdmin, requireAdminRequest, asyncHandler(async (request, response) => {
     const ticket = await store.update((data) => {
-      const found = data.tickets.find((item) => item.id === request.params.ticketId);
-      if (!found) throw notFound('El ticket no existe.');
+      const index = data.tickets.findIndex((item) => item.id === request.params.ticketId);
+      if (index === -1) throw notFound('El ticket no existe.');
+      const found = data.tickets[index];
       const input = request.body?.buyer;
-      found.buyer = input === null ? null : cleanBuyer(input, {
+      if (input === null) {
+        data.tickets.splice(index, 1);
+        return null;
+      }
+      found.buyer = cleanBuyer(input, {
         assignedAt: found.buyer?.assignedAt,
         defaultPaymentStatus: found.buyer?.paymentStatus || 'paid',
         source: found.buyer?.source || 'admin',
@@ -386,12 +372,12 @@ export async function createApp({ config, store = new JsonStore(config.dataFile)
   }));
 
   app.get('/', (request, response) => {
-    response.redirect(302, '/1');
+    response.setHeader('Cache-Control', 'no-cache');
+    response.sendFile(join(config.publicDir, 'index.html'));
   });
 
   app.get(['/1', '/1/', '/2', '/2/'], (request, response) => {
-    response.setHeader('Cache-Control', 'no-cache');
-    response.sendFile(join(config.publicDir, 'index.html'));
+    response.redirect(302, '/');
   });
 
   app.get(['/admin', '/admin/'], (request, response) => {

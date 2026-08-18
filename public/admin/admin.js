@@ -23,10 +23,11 @@ const elements = {
   ticketDialogOrigin: document.querySelector('#ticket-dialog-origin'),
   ticketForm: document.querySelector('#ticket-form'),
   releaseTicketButton: document.querySelector('#release-ticket-button'),
+  drawCheckForm: document.querySelector('#draw-check-form'),
+  drawCheckResult: document.querySelector('#draw-check-result'),
   total: document.querySelector('#admin-total'),
   pending: document.querySelector('#admin-pending'),
   paid: document.querySelector('#admin-paid'),
-  available: document.querySelector('#admin-available'),
   prizeCount: document.querySelector('#admin-prizes'),
   toast: document.querySelector('#admin-toast'),
 };
@@ -123,7 +124,6 @@ function renderStats() {
   elements.total.textContent = String(state.data.tickets.length);
   elements.pending.textContent = String(pending);
   elements.paid.textContent = String(paid);
-  elements.available.textContent = String(state.data.tickets.length - occupied.length);
   elements.prizeCount.textContent = String(state.data.prizes.length);
 }
 
@@ -211,7 +211,6 @@ function renderPrizes() {
 }
 
 function ticketMatches(ticket) {
-  if (state.ticketFilter === 'available' && ticket.buyer) return false;
   if (state.ticketFilter === 'pending' && ticket.buyer?.paymentStatus !== 'pending') return false;
   if (state.ticketFilter === 'paid' && (!ticket.buyer || ticket.buyer.paymentStatus === 'pending')) return false;
   if (!state.ticketQuery) return true;
@@ -226,17 +225,15 @@ function ticketMatches(ticket) {
 }
 
 function openTicketDialog(ticket) {
-  elements.ticketDialogTitle.textContent = ticket.buyer ? `Editar ${ticket.id}` : `Asignar ${ticket.id}`;
+  elements.ticketDialogTitle.textContent = `Editar ${ticket.id}`;
   elements.ticketDialogPair.textContent = `Par único: ${ticket.first} — ${ticket.second}`;
   field(elements.ticketForm, 'ticketId').value = ticket.id;
   field(elements.ticketForm, 'name').value = ticket.buyer?.name || '';
   field(elements.ticketForm, 'phone').value = ticket.buyer?.phone || '';
   field(elements.ticketForm, 'notes').value = ticket.buyer?.notes || '';
   field(elements.ticketForm, 'paymentStatus').value = ticket.buyer?.paymentStatus === 'pending' ? 'pending' : 'paid';
-  elements.ticketDialogOrigin.textContent = ticket.buyer
-    ? `Origen: ${ticket.buyer.source === 'public' ? 'inscripción desde la web' : 'asignación administrativa'}`
-    : 'Ticket libre: la asignación se realizará desde el panel.';
-  elements.releaseTicketButton.disabled = !ticket.buyer;
+  elements.ticketDialogOrigin.textContent = `Origen: ${ticket.buyer.source === 'public' ? 'inscripción desde la web' : 'asignación administrativa'}`;
+  elements.releaseTicketButton.disabled = false;
   elements.ticketDialog.showModal();
   field(elements.ticketForm, 'name').focus();
 }
@@ -247,24 +244,22 @@ function renderTickets() {
   for (const ticket of tickets) {
     const isPending = ticket.buyer?.paymentStatus === 'pending';
     const row = document.createElement('article');
-    row.className = `admin-ticket-row ${ticket.buyer ? (isPending ? 'is-pending' : 'is-paid') : 'is-available'}`;
+    row.className = `admin-ticket-row ${isPending ? 'is-pending' : 'is-paid'}`;
     const edit = document.createElement('button');
     edit.type = 'button';
     edit.className = 'button button-secondary button-small';
-    edit.textContent = ticket.buyer ? 'Editar' : 'Asignar';
+    edit.textContent = 'Editar';
     edit.addEventListener('click', () => openTicketDialog(ticket));
 
     row.append(
       textElement('span', 'admin-ticket-id', ticket.id),
       textElement('strong', 'admin-ticket-pair', `${ticket.first} — ${ticket.second}`),
-      textElement('p', 'admin-ticket-buyer', ticket.buyer?.name || 'Disponible'),
-      textElement('p', 'admin-ticket-phone', ticket.buyer?.phone || 'Sin teléfono'),
+      textElement('p', 'admin-ticket-buyer', ticket.buyer.name),
+      textElement('p', 'admin-ticket-phone', ticket.buyer.phone || 'Sin teléfono'),
       textElement(
         'span',
-        `admin-ticket-payment ${ticket.buyer ? (isPending ? 'is-pending' : 'is-paid') : 'is-available'}`,
-        ticket.buyer
-          ? `${isPending ? 'Pendiente' : 'Pagado'} · ${ticket.buyer.source === 'public' ? 'Web' : 'Admin'}`
-          : 'Disponible',
+        `admin-ticket-payment ${isPending ? 'is-pending' : 'is-paid'}`,
+        `${isPending ? 'Pendiente' : 'Pagado'} · ${ticket.buyer.source === 'public' ? 'Web' : 'Admin'}`,
       ),
       edit,
     );
@@ -274,6 +269,33 @@ function renderTickets() {
   if (tickets.length === 0) {
     elements.ticketList.append(textElement('p', 'empty-inline', 'No hay tickets que coincidan con la búsqueda.'));
   }
+}
+
+function findTicketByPair(first, second) {
+  return state.data.tickets.find((ticket) => (
+    (ticket.first === first && ticket.second === second)
+    || (ticket.first === second && ticket.second === first)
+  ));
+}
+
+function winnerResult(title, first, second) {
+  const ticket = findTicketByPair(first, second);
+  const article = document.createElement('article');
+  article.className = `winner-result ${ticket ? (ticket.buyer.paymentStatus === 'paid' ? 'is-paid' : 'is-pending') : 'is-empty'}`;
+  article.append(
+    textElement('span', 'winner-label', title),
+    textElement('strong', 'winner-pair', `${first} — ${second}`),
+  );
+  if (!ticket) {
+    article.append(textElement('p', '', 'No existe un ticket reservado con este par.'));
+    return article;
+  }
+  article.append(
+    textElement('p', 'winner-owner', `${ticket.buyer.name} · ${ticket.id}`),
+    textElement('p', 'winner-contact', ticket.buyer.phone || 'Sin teléfono registrado'),
+    textElement('span', 'winner-payment', ticket.buyer.paymentStatus === 'paid' ? 'Pago confirmado' : 'Pago pendiente'),
+  );
+  return article;
 }
 
 function renderAll() {
@@ -433,7 +455,7 @@ elements.ticketForm.addEventListener('submit', async (event) => {
 
 elements.releaseTicketButton.addEventListener('click', async () => {
   const ticketId = field(elements.ticketForm, 'ticketId').value;
-  if (!window.confirm(`¿Retirar a la persona de ${ticketId}, borrar sus datos y dejar el ticket disponible?`)) return;
+  if (!window.confirm(`¿Eliminar ${ticketId} y todos los datos de su participante? El par podrá volver a elegirse.`)) return;
   elements.releaseTicketButton.disabled = true;
   try {
     await api(`/api/admin/tickets/${encodeURIComponent(ticketId)}`, {
@@ -441,7 +463,7 @@ elements.releaseTicketButton.addEventListener('click', async () => {
       body: { buyer: null },
     });
     elements.ticketDialog.close();
-    showToast('El ticket está disponible nuevamente.');
+    showToast('Ticket eliminado. El par puede volver a elegirse.');
     await loadData();
   } catch (error) {
     showToast(error.message, true);
@@ -458,6 +480,19 @@ elements.ticketSearch.addEventListener('input', (event) => {
 elements.ticketFilter.addEventListener('change', (event) => {
   state.ticketFilter = event.target.value;
   if (state.data) renderTickets();
+});
+
+elements.drawCheckForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+  const balls = Array.from({ length: 6 }, (_value, index) => Number(field(elements.drawCheckForm, `ball${index + 1}`).value));
+  if (new Set(balls).size !== balls.length) {
+    elements.drawCheckResult.replaceChildren(textElement('p', 'form-message', 'Las seis bolillas deben ser distintas.'));
+    return;
+  }
+  elements.drawCheckResult.replaceChildren(
+    winnerResult('Primer premio · 1.ª + 5.ª', balls[0], balls[4]),
+    winnerResult('Segundo premio · 2.ª + 6.ª', balls[1], balls[5]),
+  );
 });
 
 async function initialize() {

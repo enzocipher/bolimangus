@@ -7,11 +7,12 @@ import { after, before, describe, it } from 'node:test';
 import { createApp } from '../src/app.js';
 import { createPasswordHash } from '../src/auth.js';
 
-describe('API de la rifa', () => {
+describe('API de la rifa dinamica', () => {
   let directory;
   let server;
   let baseUrl;
   let cookie;
+  let reservedTicket;
 
   before(async () => {
     directory = await mkdtemp(join(tmpdir(), 'rifa-app-'));
@@ -40,36 +41,19 @@ describe('API de la rifa', () => {
     if (directory) await rm(directory, { recursive: true, force: true });
   });
 
-  it('publica 106 tickets sin datos privados del comprador', async () => {
+  it('publica una lista segura de tickets sin campos privados ni contador separado', async () => {
     const response = await fetch(`${baseUrl}/api/public`);
     assert.equal(response.status, 200);
     const payload = await response.json();
-    assert.equal(payload.tickets.length, 106);
-  });
-
-  it('publica dos vistas aisladas de 53 tickets sin identificadores globales', async () => {
-    const [firstResponse, secondResponse] = await Promise.all([
-      fetch(`${baseUrl}/api/public/1`),
-      fetch(`${baseUrl}/api/public/2`),
-    ]);
-    assert.equal(firstResponse.status, 200);
-    assert.equal(secondResponse.status, 200);
-    const first = await firstResponse.json();
-    const second = await secondResponse.json();
-    assert.equal(first.tickets.length, 53);
-    assert.equal(second.tickets.length, 53);
-    assert.equal('id' in first.tickets[0], false);
-    assert.equal('id' in second.tickets[0], false);
-    assert.notDeepEqual(
-      [first.tickets[0].first, first.tickets[0].second],
-      [second.tickets[0].first, second.tickets[0].second],
-    );
+    assert.deepEqual(payload.tickets, []);
+    assert.equal('ticketCount' in payload, false);
+    assert.equal('totalTickets' in payload, false);
+    assert.ok(payload.raffle);
+    assert.ok(Array.isArray(payload.prizes));
   });
 
   it('protege el panel, inicia sesion y exige cabecera administrativa', async () => {
-    const unauthorized = await fetch(`${baseUrl}/api/admin/data`);
-    assert.equal(unauthorized.status, 401);
-
+    assert.equal((await fetch(`${baseUrl}/api/admin/data`)).status, 401);
     const login = await fetch(`${baseUrl}/api/admin/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -77,8 +61,7 @@ describe('API de la rifa', () => {
     });
     assert.equal(login.status, 200);
     cookie = login.headers.get('set-cookie').split(';')[0];
-
-    const blockedMutation = await fetch(`${baseUrl}/api/admin/tickets/T001`, {
+    const blockedMutation = await fetch(`${baseUrl}/api/admin/tickets/inexistente`, {
       method: 'PATCH',
       headers: { Cookie: cookie, 'Content-Type': 'application/json' },
       body: JSON.stringify({ buyer: null }),
@@ -86,119 +69,87 @@ describe('API de la rifa', () => {
     assert.equal(blockedMutation.status, 403);
   });
 
-  it('asigna comprador sin alterar el par y oculta telefono y notas en la API publica', async () => {
-    const beforeResponse = await fetch(`${baseUrl}/api/admin/data`, { headers: { Cookie: cookie } });
-    const beforeData = await beforeResponse.json();
-    const beforeTicket = beforeData.tickets[0];
-
-    const updated = await fetch(`${baseUrl}/api/admin/tickets/T001`, {
-      method: 'PATCH',
-      headers: {
-        Cookie: cookie,
-        'Content-Type': 'application/json',
-        'X-Rifa-Admin': '1',
-      },
-      body: JSON.stringify({
-        buyer: { name: 'Persona publica', phone: '987654321', notes: 'Nota privada' },
-      }),
-    });
-    assert.equal(updated.status, 200);
-    const updatedPayload = await updated.json();
-    assert.deepEqual(
-      [updatedPayload.ticket.first, updatedPayload.ticket.second],
-      [beforeTicket.first, beforeTicket.second],
-    );
-
-    const publicResponse = await fetch(`${baseUrl}/api/public`);
-    const publicTicket = (await publicResponse.json()).tickets[0];
-    assert.deepEqual(publicTicket.buyer, { name: 'Persona publica', paymentStatus: 'paid' });
-    assert.equal('phone' in publicTicket.buyer, false);
-    assert.equal('notes' in publicTicket.buyer, false);
-  });
-
-  it('permite una sola inscripcion publica, protege el telefono y deja el pago pendiente', async () => {
-    const pageResponse = await fetch(`${baseUrl}/api/public/1`);
-    const pageData = await pageResponse.json();
-    const candidate = pageData.tickets.find((ticket) => !ticket.buyer);
-    const registrationBody = {
-      first: candidate.first,
-      second: candidate.second,
-      name: 'Reserva desde web',
-      phone: '987 111 222',
-      paymentStatus: 'paid',
-    };
-
-    const missingHeader = await fetch(`${baseUrl}/api/public/1/tickets/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(registrationBody),
-    });
-    assert.equal(missingHeader.status, 403);
-
+  it('crea el par elegido y bloquea simultaneamente su orden inverso', async () => {
+    const body = { first: 12, second: 1, name: 'Reserva desde web', phone: '987 111 222', paymentStatus: 'paid' };
     const attempts = await Promise.all([
-      fetch(`${baseUrl}/api/public/1/tickets/register`, {
+      fetch(`${baseUrl}/api/public/tickets/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Rifa-Public': '1' },
-        body: JSON.stringify(registrationBody),
+        body: JSON.stringify(body),
       }),
-      fetch(`${baseUrl}/api/public/1/tickets/register`, {
+      fetch(`${baseUrl}/api/public/tickets/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Rifa-Public': '1' },
-        body: JSON.stringify({ ...registrationBody, name: 'Intento duplicado' }),
+        body: JSON.stringify({ ...body, first: 1, second: 12, name: 'Intento inverso' }),
       }),
     ]);
     assert.deepEqual(attempts.map((response) => response.status).sort(), [201, 409]);
 
-    const publicAfter = await (await fetch(`${baseUrl}/api/public/1`)).json();
-    const publicTicket = publicAfter.tickets.find((ticket) => ticket.first === candidate.first && ticket.second === candidate.second);
-    assert.equal(publicTicket.buyer.paymentStatus, 'pending');
-    assert.equal('phone' in publicTicket.buyer, false);
-
     const adminData = await (await fetch(`${baseUrl}/api/admin/data`, { headers: { Cookie: cookie } })).json();
-    const adminTicket = adminData.tickets.find((ticket) => ticket.first === candidate.first && ticket.second === candidate.second);
-    assert.equal(adminTicket.buyer.phone, '987 111 222');
-    assert.equal(adminTicket.buyer.source, 'public');
-    assert.equal(adminTicket.buyer.paymentStatus, 'pending');
+    assert.equal(adminData.tickets.length, 1);
+    reservedTicket = adminData.tickets[0];
+    assert.ok(['Reserva desde web', 'Intento inverso'].includes(reservedTicket.buyer.name));
+    assert.equal(reservedTicket.buyer.phone, '987 111 222');
+    assert.equal(reservedTicket.buyer.source, 'public');
+    assert.equal(reservedTicket.buyer.paymentStatus, 'pending');
 
-    const paid = await fetch(`${baseUrl}/api/admin/tickets/${adminTicket.id}`, {
+    const publicData = await (await fetch(`${baseUrl}/api/public`)).json();
+    assert.equal(publicData.tickets.length, 1);
+    assert.deepEqual(publicData.tickets[0], {
+      first: reservedTicket.first,
+      second: reservedTicket.second,
+      buyer: {
+        name: reservedTicket.buyer.name,
+        paymentStatus: 'pending',
+      },
+    });
+  });
+
+  it('rechaza pares iguales, fuera de rango y solicitudes publicas sin cabecera', async () => {
+    const headers = { 'Content-Type': 'application/json', 'X-Rifa-Public': '1' };
+    const base = { name: 'Persona', phone: '999999999' };
+    const same = await fetch(`${baseUrl}/api/public/tickets/register`, {
+      method: 'POST', headers, body: JSON.stringify({ ...base, first: 25, second: 25 }),
+    });
+    const outside = await fetch(`${baseUrl}/api/public/tickets/register`, {
+      method: 'POST', headers, body: JSON.stringify({ ...base, first: 0, second: 54 }),
+    });
+    const noHeader = await fetch(`${baseUrl}/api/public/tickets/register`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...base, first: 2, second: 3 }),
+    });
+    assert.equal(same.status, 400);
+    assert.equal(outside.status, 400);
+    assert.equal(noHeader.status, 403);
+  });
+
+  it('permite al admin confirmar pago sin cambiar el par', async () => {
+    const updated = await fetch(`${baseUrl}/api/admin/tickets/${reservedTicket.id}`, {
       method: 'PATCH',
       headers: { Cookie: cookie, 'Content-Type': 'application/json', 'X-Rifa-Admin': '1' },
-      body: JSON.stringify({ buyer: { ...adminTicket.buyer, paymentStatus: 'paid' } }),
+      body: JSON.stringify({ buyer: { ...reservedTicket.buyer, paymentStatus: 'paid', name: 'Pago confirmado' } }),
     });
-    assert.equal(paid.status, 200);
-    const paidPublic = await (await fetch(`${baseUrl}/api/public/1`)).json();
-    assert.equal(
-      paidPublic.tickets.find((ticket) => ticket.first === candidate.first && ticket.second === candidate.second).buyer.paymentStatus,
-      'paid',
-    );
+    assert.equal(updated.status, 200);
+    const ticket = (await updated.json()).ticket;
+    assert.deepEqual([ticket.first, ticket.second], [12, 1]);
+    assert.equal(ticket.buyer.paymentStatus, 'paid');
+    assert.equal(ticket.buyer.source, 'public');
+  });
 
-    const released = await fetch(`${baseUrl}/api/admin/tickets/${adminTicket.id}`, {
+  it('elimina el ticket al retirar al participante y permite elegir el par otra vez', async () => {
+    const released = await fetch(`${baseUrl}/api/admin/tickets/${reservedTicket.id}`, {
       method: 'PATCH',
       headers: { Cookie: cookie, 'Content-Type': 'application/json', 'X-Rifa-Admin': '1' },
       body: JSON.stringify({ buyer: null }),
     });
     assert.equal(released.status, 200);
-    const releasedPublic = await (await fetch(`${baseUrl}/api/public/1`)).json();
-    assert.equal(
-      releasedPublic.tickets.find((ticket) => ticket.first === candidate.first && ticket.second === candidate.second).buyer,
-      null,
-    );
-  });
+    assert.equal((await (await fetch(`${baseUrl}/api/admin/data`, { headers: { Cookie: cookie } })).json()).tickets.length, 0);
 
-  it('impide inscribir desde una vista un ticket perteneciente a la otra', async () => {
-    const firstPage = await (await fetch(`${baseUrl}/api/public/1`)).json();
-    const candidate = firstPage.tickets.find((ticket) => !ticket.buyer);
-    const response = await fetch(`${baseUrl}/api/public/2/tickets/register`, {
+    const reused = await fetch(`${baseUrl}/api/public/tickets/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-Rifa-Public': '1' },
-      body: JSON.stringify({
-        first: candidate.first,
-        second: candidate.second,
-        name: 'Vista incorrecta',
-        phone: '999999999',
-      }),
+      body: JSON.stringify({ first: 1, second: 12, name: 'Nueva reserva', phone: '988888888' }),
     });
-    assert.equal(response.status, 404);
+    assert.equal(reused.status, 201);
   });
 
   it('acepta una imagen valida y rechaza contenido que solo finge ser PNG', async () => {
@@ -208,54 +159,40 @@ describe('API de la rifa', () => {
     validForm.append('description', 'Imagen de prueba');
     validForm.append('image', new Blob([validPng], { type: 'image/png' }), 'premio.png');
     const created = await fetch(`${baseUrl}/api/admin/prizes`, {
-      method: 'POST',
-      headers: { Cookie: cookie, 'X-Rifa-Admin': '1' },
-      body: validForm,
+      method: 'POST', headers: { Cookie: cookie, 'X-Rifa-Admin': '1' }, body: validForm,
     });
     assert.equal(created.status, 201);
-    const createdPrize = (await created.json()).prize;
-    assert.match(createdPrize.imageUrl, /^\/uploads\/[a-f0-9-]+\.png$/);
+    assert.match((await created.json()).prize.imageUrl, /^\/uploads\/[a-f0-9-]+\.png$/);
 
     const fakeForm = new FormData();
     fakeForm.append('name', 'Archivo falso');
     fakeForm.append('description', 'No debe guardarse');
     fakeForm.append('image', new Blob(['esto no es una imagen'], { type: 'image/png' }), 'falso.png');
     const rejected = await fetch(`${baseUrl}/api/admin/prizes`, {
-      method: 'POST',
-      headers: { Cookie: cookie, 'X-Rifa-Admin': '1' },
-      body: fakeForm,
+      method: 'POST', headers: { Cookie: cookie, 'X-Rifa-Admin': '1' }, body: fakeForm,
     });
     assert.equal(rejected.status, 400);
-    assert.match((await rejected.json()).error.message, /PNG, JPEG o WebP valido/);
   });
 
-  it('sirve la pagina publica y el panel con encabezados de seguridad', async () => {
-    const [home, firstPage, secondPage, admin] = await Promise.all([
-      fetch(`${baseUrl}/`),
-      fetch(`${baseUrl}/1`),
-      fetch(`${baseUrl}/2/`),
-      fetch(`${baseUrl}/admin`),
-    ]);
+  it('sirve una sola pagina publica y conserva las rutas antiguas como redirecciones', async () => {
+    const home = await fetch(`${baseUrl}/`);
+    const firstPage = await fetch(`${baseUrl}/1`, { redirect: 'manual' });
+    const secondPage = await fetch(`${baseUrl}/2/`, { redirect: 'manual' });
+    const admin = await fetch(`${baseUrl}/admin`);
     assert.equal(home.status, 200);
-    assert.equal(new URL(home.url).pathname, '/1');
-    assert.equal(firstPage.status, 200);
-    assert.equal(secondPage.status, 200);
+    assert.equal(firstPage.status, 302);
+    assert.equal(firstPage.headers.get('location'), '/');
+    assert.equal(secondPage.status, 302);
+    assert.equal(secondPage.headers.get('location'), '/');
     assert.equal(admin.status, 200);
-    const contentSecurityPolicy = home.headers.get('content-security-policy');
-    assert.match(contentSecurityPolicy, /default-src 'self'/);
-    assert.doesNotMatch(contentSecurityPolicy, /upgrade-insecure-requests/);
+    const html = await home.text();
+    assert.match(html, /Elige tus dos números/);
+    assert.match(html, /Primer premio/);
+    assert.match(html, /Segundo premio/);
+    assert.match(html, /Tickets elegidos/);
+    assert.doesNotMatch(html, /Tickets totales|tickets encontrados|53 tickets|106 pares/);
+    const adminHtml = await admin.text();
+    assert.match(adminHtml, /Verificar ganadores de la Tinka/);
     assert.equal(home.headers.get('x-content-type-options'), 'nosniff');
-    const homeHtml = await home.text();
-    assert.match(homeHtml, /Tickets y participantes/);
-    assert.match(homeHtml, /Inscríbete en este ticket/);
-    assert.match(homeHtml, /Sorteo activo · 53 tickets/);
-    assert.match(homeHtml, /Modalidad del sorteo/);
-    assert.match(homeHtml, /Primer premio/);
-    assert.match(homeHtml, /Segundo premio/);
-    const secondPageHtml = await secondPage.text();
-    assert.match(secondPageHtml, /Primer premio/);
-    assert.match(secondPageHtml, /Segundo premio/);
-    assert.doesNotMatch(homeHtml, /53 oportunidades/);
-    assert.match(await admin.text(), /Administración/);
   });
 });

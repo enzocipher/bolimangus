@@ -3,93 +3,91 @@
 ## Objetivo del proyecto
 
 Construir y mantener una sola aplicacion web de rifa, pequena y apta para una
-instancia Oracle con 1 GB de RAM. La pagina publica muestra la informacion de la
-rifa, premios, contacto y los tickets con sus compradores. La administracion
-vive en `/admin`. No existe pasarela de pagos.
+instancia Oracle con 1 GB de RAM. La pagina publica permite elegir un par de
+numeros y muestra los tickets reservados, informacion, premios y contacto. La administracion vive en
+`/admin`. No existe pasarela de pagos.
 
 ## Decisiones confirmadas con el usuario
 
 - Usar Node.js y Express.
 - Usar `pnpm` como unico gestor de paquetes y conservar `pnpm-lock.yaml`.
-- Usar HTML, CSS y JavaScript sin un framework de interfaz.
-- Persistir toda la informacion en archivos JSON locales; no agregar una base
-  de datos ni enviar los datos a servicios externos.
-- Usar contenido e imagenes provisionales en la primera version.
-- Mantener la solucion sencilla y de bajo consumo. Ante varias alternativas,
-  elegir la mas facil de operar y explicar la eleccion antes de aplicarla.
-- Preguntar al usuario antes de introducir una tecnologia, dependencia,
-  servicio, despliegue o cambio de arquitectura no acordado.
+- Usar HTML, CSS y JavaScript sin framework de interfaz.
+- Persistir toda la informacion en archivos JSON locales; no agregar base de
+  datos ni enviar datos a servicios externos.
+- Mantener la solucion sencilla, autonoma y de bajo consumo.
+- No agregar tecnologias, dependencias o servicios sin aprobacion previa.
+- Existe una sola pagina publica en `/`; `/1` y `/2` solo redirigen a `/` por
+  compatibilidad y no representan rifas separadas.
 
-## Reglas inmutables de los tickets
+## Reglas inmutables de los tickets dinamicos
 
-- Deben existir exactamente 106 tickets.
-- Cada ticket contiene dos numeros distintos dentro de un par no dirigido.
-- Ambos numeros estan dentro del intervalo inclusivo `1..53`.
+- No existe una cantidad prefijada de tickets ni se generan pares al iniciar.
+- Un ticket se crea solamente cuando una persona elige un par y se inscribe.
+- Cada ticket contiene dos numeros enteros distintos dentro de `1..53`.
 - No se permiten numeros iguales: `(24, 24)` es invalido.
-- El orden no crea otro ticket: `(23, 25)` y `(25, 23)` representan el mismo
-  par y no pueden coexistir.
-- No puede repetirse un par entre dos tickets, ni en el mismo orden ni
-  invertido.
-- Los 106 pares se generan aleatoriamente solo durante la inicializacion, si el
-  archivo de datos todavia no existe.
-- La migracion aprobada el 2026-08-12 permite una regeneracion explicita, con
-  respaldo previo, solamente cuando ningun ticket tiene comprador.
-- Si el archivo existe pero esta corrupto o no cumple las reglas, la aplicacion
-  debe detenerse con un error claro. Nunca debe regenerar los tickets en
-  silencio, porque eso podria cambiar tickets vendidos.
-- Asignar, editar o retirar un comprador nunca debe modificar el par del ticket.
+- El par es no dirigido: `(12, 1)` y `(1, 12)` representan el mismo ticket y
+  no pueden coexistir.
+- El servidor debe comprobar la unicidad dentro de la misma escritura atomica
+  que crea la reserva para impedir adjudicaciones simultaneas.
+- Editar el participante o su pago nunca modifica el par.
+- Retirar al participante elimina por completo el ticket; desde ese momento el
+  par vuelve a estar disponible para una nueva eleccion.
+- Si el JSON esta corrupto o no cumple las reglas, la aplicacion debe detenerse
+  y nunca repararlo o reemplazarlo silenciosamente.
 
-## Modalidad confirmada del sorteo
+## Privacidad publica
 
-- El resultado oficial de la Tinka aporta seis bolillas ordenadas por posición.
-- El primer premio usa la primera y la quinta bolilla.
-- El segundo premio usa la segunda y la sexta bolilla.
-- Tanto `/1` como `/2` deben mostrar completas las explicaciones de ambos
-  premios, sin crear enlaces entre las dos vistas de tickets.
-- Las capturas y números mostrados para explicar la modalidad son ejemplos; no
-  deben presentarse como un resultado real.
-- La interfaz debe decir `53 tickets`, no `53 oportunidades`, y no debe enlazar
-  `/1` con `/2`.
+- La pagina y la API publicas muestran la lista segura de tickets reservados:
+  par, nombre publico del participante y estado pendiente o confirmado.
+- No se muestran contadores, resumen de cantidades, disponibilidad total ni
+  identificadores internos de los tickets.
+- Telefonos, notas y origen de la reserva son exclusivos de `/admin`.
+- No guardar secretos en el repositorio; credenciales y secretos de sesion
+  provienen del entorno del proceso.
 
-## Persistencia y privacidad
+## Inscripcion y control de pago
 
-- Las escrituras del JSON deben serializarse y realizarse de forma atomica.
-- Mantener una copia de respaldo local antes de reemplazar datos existentes.
-- La API publica solo puede exponer los datos publicos del comprador definidos
-  por la interfaz. Telefonos, notas internas y credenciales son exclusivos de
-  `/admin`.
-- No guardar secretos en el repositorio. Las credenciales de administracion y
-  secretos de sesion deben venir del entorno del proceso.
-- Validar todos los datos en el servidor, aunque tambien se validen en el
+- La persona elige directamente ambos numeros en `/` e ingresa nombre publico
+  y telefono privado.
+- Toda inscripcion publica nace como `pending`; el cliente publico nunca puede
+  elegir o alterar el estado de pago.
+- Solo el administrador puede cambiar una reserva a `paid`, editar sus datos o
+  eliminar el ticket y participante si no paga.
+- No se solicitan, procesan ni almacenan datos bancarios o de tarjetas.
+- Validar todos los datos en el servidor aunque tambien se validen en el
   navegador.
 
-## Inscripcion publica y control de pago
+## Modalidad del sorteo
 
-- Una persona puede tocar un ticket disponible en `/1` o `/2` e inscribirse
-  con nombre publico y telefono privado.
-- Toda inscripcion publica nace con estado `pending`; la aplicacion no cobra ni
-  recibe datos de pago.
-- Solo el administrador puede cambiar una reserva a `paid`, editar sus datos o
-  retirar al participante y volver a dejar disponible el ticket.
-- El servidor debe comprobar en la misma escritura atomica que el ticket sigue
-  libre y que pertenece a la vista `/1` o `/2` desde la que se solicita. Nunca
-  confiar en un identificador o estado de pago enviado por el cliente publico.
-- Las reservas antiguas sin estado explicito se interpretan como pagadas para
-  conservar compatibilidad con el JSON existente.
-- La API publica puede mostrar el nombre y si esta pendiente o confirmado;
-  telefono, notas y origen de la reserva son exclusivos de `/admin`.
+- El resultado oficial de la Tinka aporta seis bolillas ordenadas por posicion.
+- El primer premio usa la primera y la quinta bolilla.
+- El segundo premio usa la segunda y la sexta bolilla.
+- La pagina publica muestra completas ambas explicaciones y deja claro que los
+  numeros visuales son solo un ejemplo.
+- `/admin` permite ingresar las seis bolillas y busca los tickets que coincidan
+  con ambos pares ganadores, mostrando participante y estado de pago.
 
-## Calidad y operacion
+## Migracion aprobada el 2026-08-18
 
-- Priorizar HTML semantico, navegacion por teclado, contraste legible y diseno
-  adaptable a telefonos.
-- Evitar procesos de compilacion y dependencias innecesarias en produccion.
-- Agregar pruebas para la generacion y validacion de tickets, persistencia y
-  rutas criticas de administracion.
-- Antes de afirmar que una tarea termino, ejecutar las pruebas y una comprobacion
-  de inicio de la aplicacion.
-- Actualizar `progress.md` despues de cada bloque material de trabajo, anotando
-  lo terminado, lo pendiente y las decisiones nuevas.
+- Se reemplazo el formato fijo de 106 pares por tickets dinamicos en JSON
+  version 2.
+- La migracion explicita elimina todos los tickets y compradores anteriores,
+  conserva configuracion y premios y genera un respaldo fechado.
+- El usuario confirmo que no existen compradores ni en local ni en Ubuntu y
+  autorizo borrar esos tickets incluso sin respaldo en Ubuntu.
+- Nunca ejecutar esta migracion automaticamente durante el arranque.
+
+## Persistencia y operacion
+
+- Serializar las escrituras JSON y hacer reemplazos atomicos.
+- Mantener `data/rifa.backup.json` antes de modificaciones ordinarias.
+- Produccion ejecuta un solo proceso Node.js para mantener una unica cola de
+  escritura.
+- Priorizar HTML semantico, teclado, contraste y diseno adaptable a telefonos.
+- Evitar procesos de compilacion y dependencias innecesarias.
+- Antes de terminar una tarea ejecutar `node --check`, `pnpm test` y comprobar
+  el arranque y rutas relevantes.
+- Actualizar `progress.md` despues de cada bloque material.
 
 ## Skills instalados para este proyecto
 
@@ -97,38 +95,30 @@ vive en `/admin`. No existe pasarela de pagos.
 - `node`, desde `mcollina/skills`.
 - `nodejs-express-server`, desde `aj-geddes/useful-ai-prompts`.
 
-### Criterios visuales vigentes
+Los skills son instrucciones para Codex y no son dependencias del servidor.
 
-- La interfaz publica usa una identidad moderna de alto contraste (navy,
-  lima y coral), tipografia del sistema, tarjetas compactas y layouts
-  responsive. El panel `/admin` usa una variante navy/azul orientada a
-  operacion, con estados visibles para tickets y formularios densos.
-- Los rediseños deben conservar los IDs y clases consumidos por `app.js` y
-  `public/admin/admin.js`; cualquier cambio de markup debe verificarse con
-  `node --check`, `pnpm test` y una comprobacion de las rutas publicas.
-- No cargar fuentes, imagenes, analiticas ni hojas de estilo remotas: el
-  servidor debe seguir siendo autonomo y liviano para 1 GB de RAM.
+## Criterios visuales
 
-Los skills son instrucciones para Codex. No forman parte de las dependencias ni
-del proceso que se ejecutara en el servidor de la rifa.
+- La interfaz publica usa identidad navy, lima y coral, tipografia del sistema
+  y un icono vectorial de ticket como marca; nunca usar `53` como logotipo.
+- El panel `/admin` usa una variante navy/azul con estados pendientes/pagados,
+  buscador y verificador de ganadores.
+- No cargar fuentes, imagenes, analiticas ni estilos remotos.
+- Versionar los recursos estaticos cuando cambien para evitar cache antiguo.
 
 ## Dependencias aprobadas
 
 - `express`: servidor HTTP, rutas, API y archivos estaticos.
 - `helmet`: encabezados de seguridad y politica de contenido.
-- `multer`: recepcion limitada de imagenes en el panel administrativo.
+- `multer`: recepcion limitada de imagenes administrativas.
 
-No agregar otra dependencia de produccion sin explicarla y obtener aprobacion.
+No agregar otra dependencia de produccion sin aprobacion.
 
 ## Despliegue aprobado
 
-- El servidor objetivo es Ubuntu en Oracle Cloud con 1 GB de RAM.
-- Produccion usa un solo proceso Node.js administrado por `systemd`, enlazado a
-  `127.0.0.1:3000`, con Nginx como unico proxy publico.
-- HTTPS se obtiene y renueva con Certbot/Let's Encrypt. OCI y UFW solo exponen
-  80/443; SSH debe limitarse a la IP administrativa.
-- Codigo, secretos y datos se separan en `/opt/bolimangus`,
-  `/etc/bolimangus` y `/var/lib/bolimangus`. El usuario del servicio no puede
-  modificar el codigo.
-- Las plantillas operativas se mantienen en `deploy/` y la guia completa en
-  `DEPLOY_UBUNTU.md`.
+- Ubuntu en Oracle Cloud con 1 GB de RAM.
+- Un proceso Node.js con `systemd` en `127.0.0.1:3000` y Nginx como proxy.
+- HTTPS mediante Certbot/Let's Encrypt; OCI y UFW solo exponen 80/443.
+- Codigo, secretos y datos se separan en `/opt/bolimangus`, `/etc/bolimangus`
+  y `/var/lib/bolimangus`.
+- Plantillas en `deploy/` y guia completa en `DEPLOY_UBUNTU.md`.

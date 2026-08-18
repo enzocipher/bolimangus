@@ -167,34 +167,35 @@ sudo -u bolimangus test -r /etc/bolimangus/bolimangus.env
 
 No copies `.env` al repositorio ni lo publiques en GitHub.
 
-## 7. Generar una sola vez los 106 tickets
+## 7. Crear o migrar el JSON de tickets dinamicos
+
+Para una instalacion nueva, crea el JSON version 2 vacio:
 
 ```bash
 sudo -u bolimangus env \
   DATA_FILE=/var/lib/bolimangus/data/rifa.json \
   /usr/local/bin/node /opt/bolimangus/scripts/initialize-data.js
 
-sudo -u bolimangus env \
-  DATA_FILE=/var/lib/bolimangus/data/rifa.json \
-  /usr/local/bin/node /opt/bolimangus/scripts/initialize-data.js
 ```
 
-La segunda ejecucion solo verifica el archivo: no debe cambiar los pares. No
-borres `rifa.json` despues de vender tickets.
+No se generan tickets al iniciar. Cada ticket se crea cuando un participante
+elige su par.
 
-### Migracion unica de la regla de pares (2026-08-12)
+### Migracion unica desde los 106 tickets antiguos (2026-08-18)
 
-Despues de copiar esta version del codigo y antes de iniciar el servicio,
-regenera los tickets una sola vez:
+Si ya existe un JSON version 1, detén el servicio y ejecuta una sola vez:
 
 ```bash
 sudo -u bolimangus env \
   DATA_FILE=/var/lib/bolimangus/data/rifa.json \
-  /usr/local/bin/node /opt/bolimangus/scripts/regenerate-tickets.js --confirm
+  /usr/local/bin/node /opt/bolimangus/scripts/migrate-dynamic-tickets.js \
+  --confirm-delete-all-tickets
 ```
 
-El comando crea un respaldo fechado y se cancela si detecta compradores. No lo
-incluyas en actualizaciones futuras ni lo ejecutes nuevamente.
+El comando conserva configuracion y premios, crea un respaldo fechado y elimina
+todos los tickets y compradores anteriores. El usuario confirmo que en Ubuntu
+no existen compradores. No incluyas este comando en actualizaciones futuras ni
+lo ejecutes nuevamente.
 
 ## 8. Instalar y arrancar el servicio systemd
 
@@ -352,6 +353,13 @@ sudo rsync -a --delete \
 sudo chown -R root:bolimangus /opt/bolimangus
 sudo find /opt/bolimangus -type d -exec chmod 0750 {} \;
 sudo find /opt/bolimangus -type f -exec chmod 0640 {} \;
+
+# Solo al publicar por primera vez la version de tickets dinamicos (2026-08-18):
+sudo -u bolimangus env \
+  DATA_FILE=/var/lib/bolimangus/data/rifa.json \
+  /usr/local/bin/node /opt/bolimangus/scripts/migrate-dynamic-tickets.js \
+  --confirm-delete-all-tickets
+
 sudo systemctl start bolimangus.service
 
 sudo systemctl status bolimangus.service --no-pager

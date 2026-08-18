@@ -1,16 +1,16 @@
 import { copyFile, mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { basename, dirname, join } from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { generateTickets, validateTickets } from './tickets.js';
+import { validateTickets } from './tickets.js';
 
 export function createDefaultData() {
   const now = new Date().toISOString();
   return {
-    version: 1,
+    version: 2,
     raffle: {
       title: 'Gran Rifa Especial',
-      subtitle: '53 tickets, dos numeros distintos por ticket',
-      description: 'Participa por premios increibles. Consulta los tickets disponibles y comunicate con la organizacion para separar el tuyo.',
+      subtitle: 'Elige dos numeros distintos del 1 al 53',
+      description: 'Elige tu propio par de numeros, registra tus datos y coordina el pago con la organizacion.',
       drawDate: 'Fecha por confirmar',
       ticketPrice: 'Precio por confirmar',
       currency: 'S/',
@@ -42,7 +42,7 @@ export function createDefaultData() {
         imageUrl: null,
       },
     ],
-    tickets: generateTickets(),
+    tickets: [],
     createdAt: now,
     updatedAt: now,
   };
@@ -50,7 +50,7 @@ export function createDefaultData() {
 
 export function validateData(data) {
   if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('El archivo de la rifa no contiene un objeto valido.');
-  if (data.version !== 1) throw new Error('La version del archivo de la rifa no es compatible.');
+  if (data.version !== 2) throw new Error('La version del archivo de la rifa no es compatible. Ejecuta la migracion explicita indicada en README.md.');
   if (!data.raffle || typeof data.raffle !== 'object') throw new Error('Falta la configuracion de la rifa.');
   for (const field of ['title', 'subtitle', 'description', 'drawDate', 'ticketPrice', 'currency', 'terms']) {
     if (typeof data.raffle[field] !== 'string') throw new Error(`raffle.${field} debe ser texto.`);
@@ -100,7 +100,7 @@ export class JsonStore {
       return this.getData();
     } catch (error) {
       if (error?.code !== 'ENOENT') {
-        throw new Error(`No se pudo cargar ${basename(this.filePath)}. Los tickets no se regeneraron.`, { cause: error });
+        throw new Error(`No se pudo cargar ${basename(this.filePath)}. Los tickets no se modificaron.`, { cause: error });
       }
     }
 

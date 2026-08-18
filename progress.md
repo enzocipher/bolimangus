@@ -1,115 +1,63 @@
 # Progreso de la rifa
 
-Ultima actualizacion: 2026-08-17
+Ultima actualizacion: 2026-08-18
 
-## Terminado
+## Estado vigente
 
-- [x] Se comprobo que el espacio de trabajo no contenia un proyecto previo.
-- [x] Se acordo y documento la arquitectura en `AGENTS.md`: Node.js, Express,
-  HTML, CSS y JavaScript sin framework de interfaz ni base de datos.
-- [x] Se cambio el gestor de paquetes a `pnpm` y se genero `pnpm-lock.yaml`.
-- [x] Se instalaron y aplicaron los skills `node`, `nodejs-express-server` y
-  `web-coder`.
-- [x] Se limitaron las dependencias de produccion a `express`, `helmet` y
-  `multer`.
-- [x] Se implemento la generacion inicial de exactamente 106 pares únicos con
-  dos valores distintos de 1 a 53.
-- [x] Se prohibieron los pares con valores iguales y los inversos duplicados:
-  `25-25` es inválido y `25-26` impide que exista `26-25`.
-- [x] Se agregó una regeneración explícita que conserva configuración y premios,
-  crea un respaldo fechado y se niega a operar si existen compradores.
-- [x] Se regeneró el JSON local (cero compradores): 106 pares únicos, cero
-  valores iguales y cero duplicados inversos; el respaldo quedó fuera de Git.
-- [x] Se impidio modificar o regenerar silenciosamente los pares existentes.
-- [x] Se inicializo `data/rifa.json` y se comprobo mediante SHA-256 que ejecutar
-  la inicializacion de nuevo no cambia ningun ticket.
-- [x] Se implemento persistencia JSON con cola de escrituras, reemplazo atomico
-  y `data/rifa.backup.json` antes de cada modificacion.
-- [x] Se implemento la pagina publica con informacion, premios, contacto,
-  estadisticas, buscador, filtros y los 106 tickets con nombre del comprador.
-- [x] Se implemento el panel `/admin` para editar informacion, contacto,
-  premios, imagenes y compradores.
-- [x] Telefono y notas del comprador se mantienen privados y nunca aparecen en
-  la API publica.
-- [x] Se implemento autenticacion con contraseña derivada mediante scrypt,
-  cookie firmada HttpOnly/SameSite, expiracion de sesion y limite de intentos.
-- [x] Se agrego proteccion de solicitudes administrativas, politica CSP,
-  encabezados de seguridad y validacion en el servidor.
-- [x] Las imagenes se limitan a 5 MB y se comprueban por MIME y firma interna
-  para PNG, JPEG y WebP; los nombres finales son aleatorios.
-- [x] Se creo un diseño adaptable, semantico, navegable por teclado, con foco
-  visible, contraste legible y respeto por movimiento reducido.
-- [x] No se agregaron fuentes, scripts, telemetria ni servicios externos.
-- [x] Se documento instalacion, secretos, datos, respaldos y operacion en
-  `README.md` y `.env.example`.
-- [x] Pasan 13 pruebas automatizadas de tickets, persistencia, autenticacion,
-  privacidad, rutas, seguridad e imagenes.
-- [x] `pnpm audit --prod` informa cero vulnerabilidades conocidas.
-- [x] Se ejecuto el servidor real: `/health`, `/`, `/admin` y `/api/public`
-  respondieron correctamente; la API devolvio 106 tickets y CSP estuvo activo.
-- [x] Se reemplazo la primera propuesta visual por un rediseño moderno en la
-  pagina publica y `/admin`: tipografia del sistema, superficies limpias,
-  paleta navy/lima/coral en publico, panel navy/azul en administracion,
-  estados de tickets mas claros y layouts responsive para movil.
-- [x] El rediseño se trabajo en paralelo con una auditoria visual y dos pases
-  independientes (publico y admin), preservando los IDs, APIs y comportamiento
-  existentes. `node --check` pasa para ambos scripts y las 13 pruebas siguen
-  pasando.
-- [x] Se reforzo especificamente el inicio que ven los participantes: se agrego
-  la seccion "Como participar", se simplifico la explicacion del ticket, se
-  versionaron los recursos para evitar CSS antiguo en cache y se elimino el
-  desplazamiento horizontal detectado durante la revision visual.
+- [x] Aplicacion Node.js + Express, HTML/CSS/JS sin framework, `pnpm` y JSON
+  local; dependencias limitadas a Express, Helmet y Multer.
+- [x] Una sola pagina publica en `/`; `/1` y `/2` redirigen a `/`.
+- [x] No existe cantidad prefijada ni generacion inicial de tickets. Cada
+  reserva crea un ticket dinamico con dos numeros elegidos entre 1 y 53.
+- [x] Se rechazan numeros iguales, valores fuera de rango, pares repetidos y
+  pares inversos: `12-1` bloquea `1-12`.
+- [x] La comprobacion de unicidad y la escritura se ejecutan dentro de la misma
+  cola atomica para evitar dobles reservas simultaneas.
+- [x] La pagina y API publicas listan cada ticket reservado con su par, nombre
+  publico y estado, sin contadores, totales, disponibilidad ni ID interno.
+- [x] El formulario publico solicita dos numeros, nombre y telefono; toda
+  reserva nace pendiente de pago y el cliente no puede marcarla pagada.
+- [x] El logotipo `53` fue reemplazado por un icono vectorial de ticket.
+- [x] `/admin` muestra el total privado de reservas, pendientes y pagadas;
+  permite buscar por par, identificador, nombre o telefono, confirmar pago,
+  editar y eliminar ticket/participante.
+- [x] Al eliminar un ticket, su par puede ser elegido nuevamente.
+- [x] `/admin` incluye un verificador de seis bolillas Tinka: busca primer
+  premio con 1.ª + 5.ª y segundo premio con 2.ª + 6.ª, mostrando participante,
+  telefono y estado de pago.
+- [x] La pagina publica conserva las explicaciones completas de ambos premios y
+  marca los numeros mostrados como ejemplo.
+- [x] El JSON usa version 2, escrituras serializadas, reemplazo atomico y
+  respaldo antes de modificaciones ordinarias.
+- [x] Se creo una migracion explicita que conserva configuracion/premios y
+  elimina todos los tickets y compradores del formato anterior.
+- [x] Se ejecuto la migracion local: 106 tickets y 0 compradores eliminados;
+  el respaldo fechado quedo fuera de Git.
+- [x] Autenticacion administrativa con scrypt, cookie HttpOnly/SameSite,
+  expiracion, limite de intentos y proteccion de mutaciones.
+- [x] Imagenes PNG/JPEG/WebP limitadas y verificadas por firma interna.
+- [x] Diseno responsive navy/lima/coral, panel navy/azul, teclado, foco visible,
+  contraste y movimiento reducido; sin recursos externos.
+- [x] Pasan 18 pruebas automatizadas de privacidad, concurrencia, pares,
+  persistencia, pago, eliminacion, reutilizacion, autenticacion e imagenes.
+- [x] Se repitieron las 18 pruebas y la comprobacion de arranque tras restaurar
+  la lista publica segura; `/api/public` no expone campos de conteo y el HTML
+  no muestra contadores.
 
 ## Pendiente para publicar
 
+- [ ] Subir los cambios a GitHub.
+- [ ] En Ubuntu: detener el servicio, hacer `git pull`, ejecutar una sola vez
+  `migrate-dynamic-tickets` contra
+  `/var/lib/bolimangus/data/rifa.json` y reiniciar el servicio.
+- [ ] Confirmar visualmente el formulario publico y el verificador Tinka con
+  los datos reales del sorteo.
 - [ ] Reemplazar textos, contacto e imagenes provisionales desde `/admin`.
-- [ ] Generar los secretos definitivos con `pnpm create-secrets` en el servidor.
-- [x] Se confirmo Ubuntu como sistema de la instancia Oracle.
-- [x] Se preparo `DEPLOY_UBUNTU.md` con `git clone`, Node.js LTS verificado,
-  permisos, UFW/OCI, `systemd`, Nginx, Certbot, HTTPS, actualizaciones y
-  recuperacion operativa.
-- [x] Se agregaron plantillas endurecidas para el servicio, proxy y respaldo
-  diario en `deploy/`.
-- [x] Se corrigio la CSP para activar `upgrade-insecure-requests` solo cuando
-  `HTTPS_ONLY=true`; durante la preparacion por HTTP, CSS y JavaScript ya no se
-  intentan cargar prematuramente mediante HTTPS.
-- [x] Se rediseñaron las tarjetas como boletos clásicos dorados dibujados con
-  CSS: perforaciones laterales, esquinas recortadas, marco ornamental,
-  estrellas, datos verticales y el par real de números como elemento central.
-- [x] Se incrementó la versión de los recursos públicos a `v=7` para que los
-  navegadores no conserven las tarjetas antiguas en caché.
-- [x] Se agregaron las vistas públicas `/1` y `/2`: cada una muestra 53
-  tickets del mismo JSON, sin regenerar ni duplicar pares. Cada vista descarga
-  solo su mitad, omite los identificadores globales y no enlaza ni menciona la
-  otra; la raíz `/` redirige a `/1`.
-- [x] En pantallas Android se compactó la cuadrícula a dos boletos por fila,
-  reduciendo adornos y espacios sin ocultar el par, estado o participante.
-- [x] Se cambió el texto público de `53 oportunidades` a `53 tickets`.
-- [x] Se agregó la modalidad basada en la Tinka con seis bolillas de ejemplo:
-  primera + quinta para el primer premio y segunda + sexta para el segundo.
-  Ambas explicaciones aparecen juntas tanto en `/1` como en `/2`, sin crear
-  enlaces entre las vistas.
-- [x] La cuadrícula de premios centra automáticamente uno, dos o tres premios
-  usando columnas de ancho limitado y conserva el diseño responsive.
-- [x] Se agrego la inscripcion publica desde cada ticket disponible con nombre
-  publico y telefono privado, sin solicitar ni procesar datos de pago.
-- [x] Toda inscripcion publica queda pendiente de pago y muestra ese estado en
-  la pagina; el telefono, las notas y el origen solo aparecen en `/admin`.
-- [x] La reserva comprueba y escribe atomically que el ticket siga libre y que
-  pertenezca a `/1` o `/2`; dos solicitudes simultaneas no pueden adjudicarse
-  el mismo ticket.
-- [x] Se mejoro `/admin` con contadores y filtros de pendientes/pagados, origen
-  Web/Admin, selector de estado y una accion explicita para retirar a la
-  persona, borrar sus datos y liberar el ticket.
-- [x] Se mantuvo compatibilidad con compradores antiguos sin estado guardado,
-  que se interpretan como pagados sin migrar ni regenerar el JSON.
-- [x] Pasan 17 pruebas automatizadas, incluidas inscripcion simultanea,
-  privacidad, pertenencia de vista, confirmacion de pago y liberacion.
-- [ ] Confirmar el dominio definitivo y ejecutar la instalacion en la instancia.
-- [ ] Guardar respaldos periodicos fuera de la instancia Oracle.
 - [ ] Activar `COOKIE_SECURE=true` y `HTTPS_ONLY=true` cuando HTTPS este listo.
+- [ ] Mantener respaldos externos periodicos del JSON y las imagenes.
 
 ## Nota de operacion
 
 Debe ejecutarse un solo proceso de la aplicacion. El JSON local es la fuente
-unica de datos y esta decision mantiene el consumo adecuado para 1 GB de RAM.
+unica de datos y la cola en memoria garantiza que dos inscripciones simultaneas
+no adjudiquen el mismo par.

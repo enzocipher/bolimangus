@@ -1,35 +1,45 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { generateTickets, TICKET_COUNT, validateTickets } from '../src/tickets.js';
+import { pairKey, samePair, validatePair, validateTickets } from '../src/tickets.js';
 
-const keepOrder = (minimum) => minimum;
+function buyer(name = 'Participante') {
+  return {
+    name,
+    phone: '999999999',
+    notes: '',
+    paymentStatus: 'pending',
+    source: 'public',
+    assignedAt: new Date().toISOString(),
+  };
+}
 
-describe('tickets sin pares repetidos', () => {
-  it('genera exactamente 106 pares distintos y no dirigidos dentro de 1..53', () => {
-    const tickets = generateTickets({ drawNumber: keepOrder });
-    assert.equal(tickets.length, TICKET_COUNT);
-    assert.equal(new Set(tickets.map((ticket) => `${Math.min(ticket.first, ticket.second)}:${Math.max(ticket.first, ticket.second)}`)).size, TICKET_COUNT);
-    assert.equal(validateTickets(tickets), true);
-    assert.ok(tickets.every((ticket) => ticket.first !== ticket.second));
+function ticket(id, first, second) {
+  return { id, first, second, buyer: buyer() };
+}
+
+describe('tickets dinamicos con pares unicos', () => {
+  it('acepta una lista vacia y cualquier cantidad valida de reservas', () => {
+    assert.equal(validateTickets([]), true);
+    assert.equal(validateTickets([ticket('A', 1, 2), ticket('B', 3, 53)]), true);
   });
 
-  it('rechaza un ticket con dos numeros iguales', () => {
-    const tickets = generateTickets({ drawNumber: keepOrder });
-    tickets[0].second = tickets[0].first;
-    assert.throws(() => validateTickets(tickets), /dos numeros distintos/);
+  it('normaliza el par para comparar ambos ordenes', () => {
+    assert.equal(pairKey(12, 1), pairKey(1, 12));
+    assert.equal(samePair(ticket('A', 12, 1), 1, 12), true);
   });
 
-  it('rechaza un par repetido en el mismo orden', () => {
-    const tickets = generateTickets({ drawNumber: keepOrder });
-    tickets.at(-1).first = tickets[0].first;
-    tickets.at(-1).second = tickets[0].second;
-    assert.throws(() => validateTickets(tickets), /repetido/);
+  it('rechaza numeros iguales o fuera de 1..53', () => {
+    assert.throws(() => validatePair(25, 25), /dos numeros distintos/);
+    assert.throws(() => validatePair(0, 12), /entre 1 y 53/);
+    assert.throws(() => validatePair(12, 54), /entre 1 y 53/);
   });
 
-  it('rechaza un par repetido en orden inverso', () => {
-    const tickets = generateTickets({ drawNumber: keepOrder });
-    tickets.at(-1).first = tickets[0].second;
-    tickets.at(-1).second = tickets[0].first;
-    assert.throws(() => validateTickets(tickets), /orden inverso/);
+  it('rechaza pares repetidos incluso en orden inverso', () => {
+    assert.throws(() => validateTickets([ticket('A', 12, 1), ticket('B', 1, 12)]), /orden inverso/);
+  });
+
+  it('rechaza identificadores repetidos y tickets sin comprador', () => {
+    assert.throws(() => validateTickets([ticket('A', 1, 2), ticket('A', 3, 4)]), /identificador/);
+    assert.throws(() => validateTickets([{ ...ticket('A', 1, 2), buyer: null }]), /comprador invalido/);
   });
 });

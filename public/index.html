@@ -3,23 +3,26 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Consulta los tickets de la rifa, conoce los premios y revisa los participantes.">
+    <meta name="description" content="Elige tu propio par de números y participa en la rifa.">
     <meta name="theme-color" content="#0b1020">
     <title>Gran Rifa Especial</title>
-    <link rel="stylesheet" href="/styles.css?v=11">
-    <script src="/app.js?v=11" defer></script>
+    <link rel="stylesheet" href="/styles.css?v=13">
+    <script src="/app.js?v=13" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#contenido">Saltar al contenido</a>
 
     <header class="site-header">
       <a class="brand" href="#contenido" aria-label="Inicio de la rifa">
-        <span class="brand-mark" aria-hidden="true">53</span>
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false"><path d="M4 5.5h16v4a2.5 2.5 0 0 0 0 5v4H4v-4a2.5 2.5 0 0 0 0-5v-4Z"/><path d="M9 8v8"/></svg>
+        </span>
         <span>Rifa especial</span>
       </a>
       <nav aria-label="Navegación principal">
         <a href="#como-participar">Cómo participar</a>
         <a href="#premios">Premios</a>
+        <a href="#elegir-ticket">Elegir ticket</a>
         <a href="#tickets">Tickets</a>
         <a href="#contacto">Contacto</a>
       </nav>
@@ -28,13 +31,13 @@
     <main id="contenido">
       <section class="hero" aria-labelledby="raffle-title">
         <div class="hero-copy">
-          <div class="hero-kicker"><span class="live-dot" aria-hidden="true"></span><span id="page-ticket-label">Sorteo activo · 53 tickets</span></div>
+          <div class="hero-kicker"><span class="live-dot" aria-hidden="true"></span><span>Sorteo activo · Elige tu par</span></div>
           <h1 id="raffle-title">Gran Rifa Especial</h1>
-          <p class="hero-subtitle" id="raffle-subtitle">Elige un ticket y participa.</p>
+          <p class="hero-subtitle" id="raffle-subtitle">Elige dos números y participa.</p>
           <p class="hero-description" id="raffle-description">Cargando información de la rifa…</p>
           <div class="hero-actions">
-            <a class="button button-primary" href="#tickets">Explorar tickets <span aria-hidden="true">↗</span></a>
-            <a class="button button-secondary" id="hero-contact" href="#contacto">Quiero participar</a>
+            <a class="button button-primary" href="#elegir-ticket">Elegir mis números <span aria-hidden="true">↗</span></a>
+            <a class="button button-secondary" id="hero-contact" href="#contacto">Contactar</a>
           </div>
           <dl class="raffle-facts">
             <div><dt>Sorteo</dt><dd id="raffle-date">Por confirmar</dd></div>
@@ -42,49 +45,34 @@
           </dl>
         </div>
 
-        <div class="hero-visual" aria-label="Vista previa de un ticket con dos números">
+        <div class="hero-visual" aria-label="Ejemplo de un ticket con dos números elegidos">
           <div class="orbit orbit-one" aria-hidden="true"></div>
           <div class="orbit orbit-two" aria-hidden="true"></div>
           <div class="hero-ticket">
-            <div class="ticket-topline"><span>RIFA · EDICIÓN</span><span>№ 001</span></div>
-            <p>Tu ticket contiene</p>
-            <div class="sample-pair" aria-hidden="true"><span>24</span><b>—</b><span>53</span></div>
-            <strong>este par identifica tu ticket</strong>
-            <small>Cada ticket completo es diferente a todos los demás.</small>
+            <div class="ticket-topline"><span>RIFA · TU ELECCIÓN</span><span>PAR ÚNICO</span></div>
+            <p>Tú eliges</p>
+            <div class="sample-pair" aria-hidden="true"><span>12</span><b>—</b><span>01</span></div>
+            <strong>dos números forman tu ticket</strong>
+            <small>El mismo par no puede reservarse otra vez, aunque se invierta el orden.</small>
             <div class="ticket-barcode" aria-hidden="true"></div>
           </div>
-          <span class="float-label label-top">2 números</span>
-          <span class="float-label label-bottom">1 oportunidad</span>
+          <span class="float-label label-top">Del 1 al 53</span>
+          <span class="float-label label-bottom">Par sin orden</span>
         </div>
-      </section>
-
-      <section class="stats-bar" aria-label="Estado de la rifa">
-        <div><strong id="stat-total">53</strong><span>Tickets totales</span></div>
-        <div><strong id="stat-available">—</strong><span>Disponibles</span></div>
-        <div><strong id="stat-sold">—</strong><span>Separados</span></div>
       </section>
 
       <section class="section participation-section" id="como-participar" aria-labelledby="participation-title">
         <div class="section-heading participation-heading">
           <div>
             <p class="eyebrow">Participar es sencillo</p>
-            <h2 id="participation-title">Elige, inscríbete y confirma</h2>
+            <h2 id="participation-title">Elige, reserva y confirma</h2>
           </div>
-          <p>Puedes separar tu ticket aquí con tu nombre y teléfono. Nunca ingreses datos de pago en esta página.</p>
+          <p>Crea tu ticket con dos números distintos. Nunca ingreses datos de pago en esta página.</p>
         </div>
         <ol class="participation-steps">
-          <li>
-            <span class="step-number" aria-hidden="true">01</span>
-            <div><h3>Busca tu ticket</h3><p>Revisa los pares disponibles y toca el que prefieras.</p></div>
-          </li>
-          <li>
-            <span class="step-number" aria-hidden="true">02</span>
-            <div><h3>Ingresa tus datos</h3><p>Escribe tu nombre y teléfono para dejar el ticket pendiente de pago.</p></div>
-          </li>
-          <li>
-            <span class="step-number" aria-hidden="true">03</span>
-            <div><h3>Coordina el pago</h3><p>La organización verificará el pago y confirmará tu ticket.</p></div>
-          </li>
+          <li><span class="step-number" aria-hidden="true">01</span><div><h3>Elige tu par</h3><p>Selecciona dos números distintos, cada uno entre 1 y 53.</p></div></li>
+          <li><span class="step-number" aria-hidden="true">02</span><div><h3>Ingresa tus datos</h3><p>Escribe tu nombre y teléfono para dejar el ticket pendiente de pago.</p></div></li>
+          <li><span class="step-number" aria-hidden="true">03</span><div><h3>Coordina el pago</h3><p>La organización verificará el pago y confirmará tu ticket.</p></div></li>
         </ol>
 
         <div class="draw-mode" aria-labelledby="draw-mode-title">
@@ -93,16 +81,8 @@
             <h3 id="draw-mode-title">La jugada ganadora define el par premiado</h3>
             <p>Tomaremos como referencia el resultado oficial de la Tinka. Los dos premios se determinan usando posiciones específicas de las seis bolillas.</p>
             <div class="draw-prize-rules">
-              <article class="draw-prize-card is-first-prize">
-                <p class="draw-prize">Primer premio</p>
-                <strong class="draw-rule">Primera y quinta bolilla</strong>
-                <p>Gana el ticket cuyo par coincida con la primera y quinta bolilla.</p>
-              </article>
-              <article class="draw-prize-card is-second-prize">
-                <p class="draw-prize">Segundo premio</p>
-                <strong class="draw-rule">Segunda y sexta bolilla</strong>
-                <p>Gana el ticket cuyo par coincida con la segunda y sexta bolilla.</p>
-              </article>
+              <article class="draw-prize-card is-first-prize"><p class="draw-prize">Primer premio</p><strong class="draw-rule">Primera y quinta bolilla</strong><p>Gana el ticket cuyo par coincida con la primera y quinta bolilla.</p></article>
+              <article class="draw-prize-card is-second-prize"><p class="draw-prize">Segundo premio</p><strong class="draw-rule">Segunda y sexta bolilla</strong><p>Gana el ticket cuyo par coincida con la segunda y sexta bolilla.</p></article>
             </div>
             <small class="draw-order-note">El orden dentro del ticket no cambia el par.</small>
           </div>
@@ -118,14 +98,8 @@
               <li class="is-second-prize"><span>6.ª</span><strong>27</strong></li>
             </ol>
             <div class="draw-results">
-              <div class="draw-result is-first-prize">
-                <span>Ejemplo · primer premio</span>
-                <strong><b>05</b><i>—</i><b>25</b></strong>
-              </div>
-              <div class="draw-result is-second-prize">
-                <span>Ejemplo · segundo premio</span>
-                <strong><b>07</b><i>—</i><b>27</b></strong>
-              </div>
+              <div class="draw-result is-first-prize"><span>Ejemplo · primer premio</span><strong><b>05</b><i>—</i><b>25</b></strong></div>
+              <div class="draw-result is-second-prize"><span>Ejemplo · segundo premio</span><strong><b>07</b><i>—</i><b>27</b></strong></div>
             </div>
             <small>Los números mostrados son únicamente un ejemplo para explicar la modalidad.</small>
           </div>
@@ -140,64 +114,60 @@
         <div class="prize-grid" id="prize-grid" aria-live="polite"></div>
       </section>
 
+      <section class="section choice-section" id="elegir-ticket" aria-labelledby="choice-title">
+        <div class="section-heading">
+          <div><p class="eyebrow">02 · Crea tu ticket</p><h2 id="choice-title">Elige tus dos números</h2></div>
+          <p>Si ese par ya fue reservado, te pediremos elegir otro. El orden inverso cuenta como el mismo ticket.</p>
+        </div>
+        <div class="choice-layout">
+          <div class="choice-preview" aria-live="polite">
+            <p>Tu par elegido</p>
+            <div class="choice-pair" aria-label="Vista previa del par elegido"><strong id="chosen-first">—</strong><span>—</span><strong id="chosen-second">—</strong></div>
+            <small>Ejemplo: 12—1 y 1—12 representan el mismo ticket.</small>
+          </div>
+          <form class="choice-form" id="registration-form">
+            <fieldset class="number-picker-group">
+              <legend>Números del ticket</legend>
+              <label class="public-field" for="first-number"><span>Primer número</span><select id="first-number" name="first" required><option value="">Elige</option></select></label>
+              <span class="pair-separator" aria-hidden="true">—</span>
+              <label class="public-field" for="second-number"><span>Segundo número</span><select id="second-number" name="second" required><option value="">Elige</option></select></label>
+            </fieldset>
+            <label class="public-field" for="participant-name"><span>Nombre del participante</span><input id="participant-name" name="name" required minlength="2" maxlength="100" autocomplete="name"></label>
+            <label class="public-field" for="participant-phone"><span>Teléfono de contacto</span><input id="participant-phone" name="phone" type="tel" required maxlength="40" autocomplete="tel" inputmode="tel" placeholder="Ej. 987 654 321"><small>El teléfono es privado: solamente lo verán los administradores.</small></label>
+            <p class="registration-status" id="registration-status" role="status" aria-live="polite"></p>
+            <button class="button button-primary" type="submit">Reservar mi ticket</button>
+          </form>
+        </div>
+      </section>
+
       <section class="section tickets-section" id="tickets" aria-labelledby="tickets-title">
         <div class="section-heading">
-          <div><p class="eyebrow">02 · Elige tu ticket</p><h2 id="tickets-title">Tickets y participantes</h2></div>
-          <p>Toca un ticket disponible para inscribirte. Los administradores revisarán el pago y las reservas.</p>
+          <div><p class="eyebrow">03 · Participantes</p><h2 id="tickets-title">Tickets elegidos</h2></div>
+          <p>Consulta los pares reservados y su estado de pago.</p>
         </div>
         <div class="ticket-toolbar" role="search">
-          <label class="search-field" for="ticket-search">
-            <span>Buscar ticket, par o participante</span>
-            <input id="ticket-search" type="search" placeholder="23-25 o un nombre" autocomplete="off">
-          </label>
+          <label class="search-field" for="ticket-search"><span>Buscar par o participante</span><input id="ticket-search" type="search" placeholder="Ej. 12-1 o un nombre" autocomplete="off"></label>
           <fieldset class="filter-group">
             <legend>Mostrar</legend>
             <label><input type="radio" name="ticket-filter" value="all" checked> Todos</label>
-            <label><input type="radio" name="ticket-filter" value="available"> Disponibles</label>
-            <label><input type="radio" name="ticket-filter" value="sold"> Separados</label>
+            <label><input type="radio" name="ticket-filter" value="pending"> Pendientes</label>
+            <label><input type="radio" name="ticket-filter" value="paid"> Confirmados</label>
           </fieldset>
         </div>
-        <p class="results-summary" id="results-summary" aria-live="polite">Cargando tickets…</p>
-        <div class="ticket-grid" id="ticket-grid"></div>
-        <div class="empty-state" id="ticket-empty" hidden><strong>No encontramos coincidencias</strong><p>Prueba con otro número, identificador o nombre.</p></div>
+        <div class="ticket-grid" id="ticket-grid" aria-live="polite"></div>
+        <div class="empty-state" id="ticket-empty" hidden><p>Aún no hay tickets que coincidan con esta búsqueda.</p></div>
       </section>
 
       <section class="contact-panel" id="contacto" aria-labelledby="contact-title">
-        <div><p class="eyebrow">03 · Contacto directo</p><h2 id="contact-title">¿Necesitas ayuda con tu reserva?</h2><p>Comunícate con la organización para coordinar el pago. Esta página no solicita ni procesa pagos.</p></div>
+        <div><p class="eyebrow">04 · Contacto directo</p><h2 id="contact-title">¿Necesitas ayuda con tu reserva?</h2><p>Comunícate con la organización para coordinar el pago. Esta página no solicita ni procesa pagos.</p></div>
         <div class="contact-links" id="contact-links"><span class="contact-placeholder">Los datos de contacto se publicarán próximamente.</span></div>
       </section>
 
-      <section class="terms section" aria-labelledby="terms-title">
-        <details><summary id="terms-title">Condiciones e información del sorteo <span aria-hidden="true">＋</span></summary><p id="raffle-terms">La información definitiva se publicará próximamente.</p></details>
-      </section>
-
+      <section class="terms section" aria-labelledby="terms-title"><details><summary id="terms-title">Condiciones e información del sorteo <span aria-hidden="true">＋</span></summary><p id="raffle-terms">La información definitiva se publicará próximamente.</p></details></section>
       <div class="page-error" id="page-error" role="alert" hidden>No pudimos cargar la información. Intenta actualizar la página.</div>
     </main>
 
     <footer class="site-footer"><p><strong>Rifa especial</strong> · Información administrada directamente por la organización.</p><a href="/admin" rel="nofollow">Administración <span aria-hidden="true">↗</span></a></footer>
-
-    <dialog class="registration-dialog" id="registration-dialog" aria-labelledby="registration-title">
-      <form method="dialog" class="registration-close-form">
-        <button type="submit" class="registration-close" aria-label="Cerrar">×</button>
-      </form>
-      <p class="eyebrow">Reserva directa</p>
-      <h2 id="registration-title">Inscríbete en este ticket</h2>
-      <p class="registration-pair" id="registration-pair"></p>
-      <p class="registration-help">Tu reserva quedará pendiente hasta que la organización compruebe el pago.</p>
-      <form class="registration-form" id="registration-form">
-        <label class="public-field">
-          <span>Nombre que se mostrará públicamente</span>
-          <input name="name" required minlength="2" maxlength="100" autocomplete="name">
-        </label>
-        <label class="public-field">
-          <span>Teléfono de contacto</span>
-          <input name="phone" type="tel" required maxlength="40" autocomplete="tel" inputmode="tel" placeholder="Ej. 987 654 321">
-          <small>El teléfono es privado: solamente lo verán los administradores.</small>
-        </label>
-        <p class="registration-status" id="registration-status" role="status" aria-live="polite"></p>
-        <button class="button button-primary" type="submit">Reservar este ticket</button>
-      </form>
-    </dialog>
-    <noscript><p class="noscript-message">Activa JavaScript para consultar el estado actualizado de los tickets.</p></noscript>
+    <noscript><p class="noscript-message">Activa JavaScript para elegir tus números y registrar el ticket.</p></noscript>
   </body>
 </html>

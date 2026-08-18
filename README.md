@@ -1,95 +1,93 @@
-# Rifa de pares únicos
+# Rifa de pares elegidos
 
-Aplicación web ligera para una sola rifa de 106 tickets. Cada ticket contiene
-dos números distintos entre 1 y 53. El orden no crea otro par: `25-26` y
-`26-25` se consideran el mismo ticket y no pueden coexistir.
+Aplicacion ligera en Node.js y Express para una sola rifa. Cada participante
+elige dos numeros distintos entre 1 y 53. El par no tiene orden: `12-1` y
+`1-12` representan el mismo ticket y solo uno puede reservarse.
 
-La página pública muestra premios, contacto y disponibilidad. Una persona puede
-tocar un ticket libre e inscribirse con nombre y teléfono; la reserva queda
-pendiente de pago. El panel privado vive en `/admin`, conserva el teléfono y las
-notas sin publicarlos, permite confirmar el pago o retirar al participante y
-liberar el ticket. No existe pasarela de pagos ni base de datos.
+No existe una cantidad prefijada de tickets. La pagina publica lista cada par
+reservado con el nombre del participante y su estado, pero no muestra
+contadores, totales, disponibilidad global ni identificadores internos. Los
+telefonos, notas y herramientas de gestion viven exclusivamente en `/admin`.
 
-## Modalidad del sorteo
+No hay pasarela de pagos ni base de datos. Los datos se guardan localmente en
+JSON mediante escrituras serializadas, atomicas y con respaldo ordinario.
 
-- Primer premio: gana el par formado por la primera y quinta bolilla del
-  resultado oficial de la Tinka.
-- Segundo premio: gana el par formado por la segunda y sexta bolilla.
-- `/1` y `/2` muestran las explicaciones de ambos premios, pero cada URL sigue
-  mostrando únicamente sus 53 tickets y no enlaza la otra vista.
-- Los números usados en la explicación visual son solo un ejemplo.
+## Funcionamiento
+
+- `/` es la unica pagina publica; `/1` y `/2` redirigen a `/`.
+- La persona elige ambos numeros, nombre y telefono.
+- Los tickets reservados aparecen publicamente sin mostrar una cantidad total.
+- La reserva nace como `pending`; solo `/admin` puede marcarla `paid`.
+- Dos solicitudes simultaneas no pueden obtener el mismo par ni su inverso.
+- Al eliminar un participante desde `/admin`, se elimina su ticket y ese par
+  puede volver a elegirse.
+- Primer premio: primera + quinta bolilla de la Tinka.
+- Segundo premio: segunda + sexta bolilla.
+- El panel permite ingresar las seis bolillas y localizar ambos tickets
+  ganadores con su participante y estado de pago.
 
 ## Requisitos
 
-- Node.js 22 o superior; para el servidor conviene una versión LTS.
+- Node.js 22 o superior.
 - pnpm 11 o superior.
 
-## Preparación local
+## Preparacion local
 
-1. Instala exactamente lo registrado en el lockfile:
+```powershell
+pnpm install --frozen-lockfile
+pnpm create-secrets
+pnpm start
+```
 
-   ```powershell
-   pnpm install --frozen-lockfile
-   ```
+Copia `ADMIN_PASSWORD_HASH` y `SESSION_SECRET` generados a un `.env` basado en
+`.env.example`. La pagina queda en `http://127.0.0.1:3000` y el panel en
+`http://127.0.0.1:3000/admin`.
 
-2. Genera la contraseña administrativa y el secreto de sesión:
+## Datos version 2
 
-   ```powershell
-   pnpm create-secrets
-   ```
+- `data/rifa.json` se crea con `tickets: []` si no existe.
+- Cada inscripcion agrega un ticket con un par unico y participante.
+- El JSON no admite tickets sin participante, numeros iguales, valores fuera
+  de `1..53`, identificadores duplicados ni pares inversos repetidos.
+- Cada modificacion ordinaria conserva la version anterior en
+  `data/rifa.backup.json`.
+- Un archivo corrupto o de una version antigua detiene el arranque; nunca se
+  cambia silenciosamente.
 
-   El comando muestra una contraseña una sola vez. Guarda esa contraseña y
-   copia las líneas `ADMIN_PASSWORD_HASH` y `SESSION_SECRET` en un archivo
-   `.env` basado en `.env.example`.
-
-3. Inicia la aplicación:
-
-   ```powershell
-   pnpm start
-   ```
-
-   La página queda en `http://127.0.0.1:3000` y el panel en
-   `http://127.0.0.1:3000/admin`.
-
-   La raíz `/` redirige a `/1`. Las vistas públicas `/1` y `/2` muestran 53
-   tickets cada una, sin enlaces ni textos que revelen la otra vista. Ambas
-   usan el mismo archivo JSON y no regeneran pares.
-
-## Datos y respaldos
-
-- `data/rifa.json` se crea únicamente si no existe.
-- En esa primera creación se generan 106 pares únicos de números distintos.
-- Un par y su inverso representan lo mismo: si existe `25-26`, no puede existir
-  `26-25`; tampoco se permiten pares como `25-25`.
-- Los pares no pueden editarse desde el panel.
-- Cada modificación válida crea `data/rifa.backup.json` con la versión
-  inmediatamente anterior.
-- Las inscripciones públicas se guardan como `pending`. Solo `/admin` puede
-  marcarlas como `paid` o retirar al participante. Una comprobación atómica
-  impide que dos personas ocupen el mismo ticket.
-- Si `rifa.json` está corrupto o no cumple las reglas, el servidor se detiene y
-  no genera tickets nuevos.
-- Las imágenes se guardan en `public/uploads` con nombres aleatorios. Solo se
-  aceptan PNG, JPEG y WebP de hasta 5 MB, comprobando tanto el tipo declarado
-  como la firma interna del archivo.
-
-Para crear o verificar los datos sin iniciar el servidor:
+Para crear o verificar un archivo version 2:
 
 ```powershell
 pnpm init-data
 ```
 
-Ejecutarlo nuevamente verifica el archivo existente; no vuelve a generar los
-pares.
+## Migracion destructiva desde los 106 tickets antiguos
 
-Para aplicar una sola vez la regla nueva sobre un JSON todavía sin compradores:
+Este comando conserva configuracion y premios, crea un respaldo fechado y
+elimina deliberadamente todos los tickets y compradores anteriores:
 
 ```powershell
-pnpm regenerate-tickets -- --confirm
+pnpm migrate-dynamic-tickets -- --confirm-delete-all-tickets
 ```
 
-El comando conserva la configuración y los premios, crea un respaldo con fecha
-y se detiene sin modificar nada si encuentra al menos un comprador.
+La migracion nunca se ejecuta automaticamente. Debe realizarse una sola vez
+antes de iniciar esta version con un JSON version 1.
+
+En Ubuntu, despues de actualizar el codigo:
+
+```bash
+sudo systemctl stop bolimangus.service
+sudo -u bolimangus env DATA_FILE=/var/lib/bolimangus/data/rifa.json \
+  /usr/local/bin/node /opt/bolimangus/scripts/migrate-dynamic-tickets.js \
+  --confirm-delete-all-tickets
+sudo systemctl start bolimangus.service
+sudo systemctl status bolimangus.service --no-pager
+curl --fail http://127.0.0.1:3000/health
+```
+
+El usuario confirmo que no existen compradores en Ubuntu. Si se elimina todo
+`/var/lib/bolimangus/data/rifa.json` en vez de migrarlo, la aplicacion tambien crea
+un archivo nuevo vacio, pero se perderan ademas configuracion, contacto y
+referencias de premios. Por eso se recomienda el comando de migracion.
 
 ## Pruebas
 
@@ -97,26 +95,12 @@ y se detiene sin modificar nada si encuentra al menos un comprador.
 pnpm test
 ```
 
-Las pruebas cubren la generación de pares distintos, el rechazo de valores
-iguales y pares inversos, la persistencia y el respaldo, la autenticación, las
-reservas simultáneas, la separación entre `/1` y `/2`, el control de pago, la
-liberación de tickets y la privacidad de teléfono y notas.
+Las pruebas cubren privacidad publica, reservas simultaneas, bloqueo del par
+inverso, rangos, persistencia, pago administrativo, eliminacion y reutilizacion
+del par, autenticacion, rutas e imagenes.
 
-## Producción
+## Produccion
 
-La guia completa para Ubuntu en Oracle Cloud, incluyendo `git clone`, usuario
-aislado, permisos, `systemd`, Nginx, HTTPS, firewall, respaldos y
-actualizaciones, esta en [`DEPLOY_UBUNTU.md`](./DEPLOY_UBUNTU.md).
-
-Antes de publicar:
-
-- usa una contraseña y un secreto distintos a los de desarrollo;
-- configura `COOKIE_SECURE=true` y `HTTPS_ONLY=true` cuando HTTPS esté activo;
-- permite escritura únicamente al usuario del servicio sobre `data` y
-  `public/uploads`;
-- conserva copias externas periódicas de `rifa.json` y las imágenes;
-- ejecuta un solo proceso de la aplicación, ya que el archivo JSON es la fuente
-  única de datos.
-
-Los archivos definitivos de servicio y proxy se prepararán cuando se confirme
-el sistema operativo de la instancia Oracle y el dominio que se utilizará.
+La guia completa para Oracle Cloud esta en
+[`DEPLOY_UBUNTU.md`](./DEPLOY_UBUNTU.md). Produccion usa un proceso Node.js con
+`systemd`, Nginx, HTTPS y datos en `/var/lib/bolimangus`.
