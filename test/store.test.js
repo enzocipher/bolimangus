@@ -3,7 +3,7 @@ import { access, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, it } from 'node:test';
-import { JsonStore, validateData } from '../src/store.js';
+import { createDefaultData, JsonStore, validateData } from '../src/store.js';
 
 const temporaryDirectories = [];
 
@@ -52,6 +52,21 @@ describe('almacen JSON dinamico', () => {
     assert.equal(saved.tickets.length, 1);
     assert.deepEqual([saved.tickets[0].first, saved.tickets[0].second], [12, 1]);
     await access(join(directory, 'rifa.backup.json'));
+  });
+
+  it('acepta premios antiguos con imageUrl y limita la galeria nueva a tres imagenes', async () => {
+    const legacy = createDefaultData();
+    delete legacy.prizes[0].imageUrls;
+    legacy.prizes[0].imageUrl = '/uploads/premio-antiguo.png';
+    assert.equal(validateData(legacy), true);
+
+    legacy.prizes[0].imageUrls = [
+      '/uploads/uno.png',
+      '/uploads/dos.png',
+      '/uploads/tres.png',
+      '/uploads/cuatro.png',
+    ];
+    assert.throws(() => validateData(legacy), /mas de 3 imagenes/i);
   });
 
   it('no modifica silenciosamente un archivo corrupto o antiguo', async () => {

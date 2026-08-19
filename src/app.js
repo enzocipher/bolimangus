@@ -23,10 +23,25 @@ function asyncHandler(handler) {
   return (request, response, next) => Promise.resolve(handler(request, response, next)).catch(next);
 }
 
+function prizeImageUrls(prize) {
+  if (Array.isArray(prize.imageUrls)) return prize.imageUrls;
+  return prize.imageUrl ? [prize.imageUrl] : [];
+}
+
+function setPrizeImageUrls(prize, imageUrls) {
+  prize.imageUrls = imageUrls;
+  delete prize.imageUrl;
+}
+
 function publicData(data) {
   return {
     raffle: data.raffle,
-    prizes: data.prizes,
+    prizes: data.prizes.map((prize) => ({
+      id: prize.id,
+      name: prize.name,
+      description: prize.description,
+      imageUrls: prizeImageUrls(prize),
+    })),
     tickets: data.tickets.map((ticket) => ({
       first: ticket.first,
       second: ticket.second,
@@ -132,7 +147,7 @@ export async function createApp({ config, store = new JsonStore(config.dataFile)
     dest: config.tempUploadDir,
     limits: {
       fileSize: config.maxImageBytes,
-      files: 1,
+      files: 3,
       fields: 4,
       fieldSize: 4_096,
     },
@@ -146,6 +161,16 @@ export async function createApp({ config, store = new JsonStore(config.dataFile)
     },
   });
 
+  const uploadPrizeImages = upload.fields([
+    { name: 'images', maxCount: 3 },
+    { name: 'image', maxCount: 1 },
+  ]);
+
+  function uploadedPrizeFiles(request) {
+    if (!request.files || Array.isArray(request.files)) return [];
+    return [...(request.files.images || []), ...(request.files.image || [])];
+  }
+
   async function finalizeUpload(file) {
     if (!file) return null;
     try {
@@ -156,6 +181,17 @@ export async function createApp({ config, store = new JsonStore(config.dataFile)
       return `/uploads/${filename}`;
     } catch (error) {
       await rm(file.path, { force: true }).catch(() => undefined);
+      throw error;
+    }
+  }
+
+  async function finalizeUploads(files) {
+    const imageUrls = [];
+    try {
+      for (const file of files) imageUrls.push(await finalizeUpload(file));
+      return imageUrls;
+    } catch (error) {
+      await Promise.all(imageUrls.map((imageUrl) => removeLocalImage(imageUrl, config.uploadDir).catch(() => undefined)));
       throw error;
     }
   }
@@ -299,13 +335,15 @@ export async function createApp({ config, store = new JsonStore(config.dataFile)
     response.json({ ticket });
   }));
 
-  app.post('/api/admin/prizes', requireAdmin, requireAdminRequest, upload.single('image'), asyncHandler(async (request, response) => {
+  app.post('/api/admin/prizes', requireAdmin, requireAdminRequest, uploadPrizeImages, asyncHandler(async (request, response) => {
     const prizeInput = cleanPrize(request.body);
-    const imageUrl = await finalizeUpload(request.file);
+    const files = uploadedPrizeFiles(request);
+    if (files.length > 3) throw validationError('Cada premio puede tener como maximo 3 imagenes.');
+    const imageUrls = await finalizeUploads(files);
     const prize = {
       id: `premio-${randomUUID()}`,
       ...prizeInput,
-      imageUrl,
+      imageUrls,
     };
     try {
       await store.update((data) => {
@@ -313,7 +351,7 @@ export async function createApp({ config, store = new JsonStore(config.dataFile)
         data.prizes.push(prize);
       });
     } catch (error) {
-      await removeLocalImage(imageUrl, config.uploadDir).catch(() => undefined);
+      await Promise.all(imageUrls.map((imageUrl) => removeLocalImage(imageUrl, config.uploadDir).catch(() => undefined)));
       throw error;
     }
     response.status(201).json({ prize });
@@ -331,35 +369,56 @@ export async function createApp({ config, store = new JsonStore(config.dataFile)
     response.json({ prize });
   }));
 
-  app.post('/api/admin/prizes/:prizeId/image', requireAdmin, requireAdminRequest, upload.single('image'), asyncHandler(async (request, response) => {
-    if (!request.file) throw validationError('Selecciona una imagen.');
-    const imageUrl = await finalizeUpload(request.file);
-    let previousImageUrl = null;
+  app.post('/api/admin/prizes/:prizeId/images', requireAdmin, requireAdminRequest, uploadPrizeImages, asyncHandler(async (request, response) => {
+    const files = uploadedPrizeFiles(request);
+    if (files.length === 0) throw validationError('Selecciona al menos una imagen.');
+    if (files.length > 3) throw validationError('Cada premio puede tener como maximo 3 imagenes.');
+    const imageUrls = await finalizeUploads(files);
     try {
       const prize = await store.update((data) => {
         const found = data.prizes.find((item) => item.id === request.params.prizeId);
         if (!found) throw notFound('El premio no existe.');
-        previousImageUrl = found.imageUrl;
-        found.imageUrl = imageUrl;
+        const currentImageUrls = prizeImageUrls(found);
+        if (currentImageUrls.length + imageUrls.length > 3) {
+          throw validationError(`Este premio ya tiene ${currentImageUrls.length} imagen(es). Solo puede tener 3 en total.`);
+        }
+        setPrizeImageUrls(found, [...currentImageUrls, ...imageUrls]);
         return found;
       });
-      await removeLocalImage(previousImageUrl, config.uploadDir).catch(() => undefined);
       response.json({ prize });
     } catch (error) {
-      await removeLocalImage(imageUrl, config.uploadDir).catch(() => undefined);
+      await Promise.all(imageUrls.map((imageUrl) => removeLocalImage(imageUrl, config.uploadDir).catch(() => undefined)));
       throw error;
     }
   }));
 
+  app.delete('/api/admin/prizes/:prizeId/images/:filename', requireAdmin, requireAdminRequest, asyncHandler(async (request, response) => {
+    const filename = request.params.filename;
+    if (!filename || basename(filename) !== filename) throw validationError('La imagen indicada no es valida.');
+    let removedImageUrl = null;
+    const prize = await store.update((data) => {
+      const found = data.prizes.find((item) => item.id === request.params.prizeId);
+      if (!found) throw notFound('El premio no existe.');
+      const imageUrls = prizeImageUrls(found);
+      const index = imageUrls.findIndex((imageUrl) => basename(imageUrl) === filename);
+      if (index === -1) throw notFound('La imagen no existe en este premio.');
+      [removedImageUrl] = imageUrls.splice(index, 1);
+      setPrizeImageUrls(found, imageUrls);
+      return found;
+    });
+    await removeLocalImage(removedImageUrl, config.uploadDir).catch(() => undefined);
+    response.json({ prize });
+  }));
+
   app.delete('/api/admin/prizes/:prizeId', requireAdmin, requireAdminRequest, asyncHandler(async (request, response) => {
-    let imageUrl = null;
+    let imageUrls = [];
     await store.update((data) => {
       const index = data.prizes.findIndex((item) => item.id === request.params.prizeId);
       if (index === -1) throw notFound('El premio no existe.');
-      imageUrl = data.prizes[index].imageUrl;
+      imageUrls = prizeImageUrls(data.prizes[index]);
       data.prizes.splice(index, 1);
     });
-    await removeLocalImage(imageUrl, config.uploadDir).catch(() => undefined);
+    await Promise.all(imageUrls.map((imageUrl) => removeLocalImage(imageUrl, config.uploadDir).catch(() => undefined)));
     response.status(204).send();
   }));
 
@@ -401,7 +460,16 @@ export async function createApp({ config, store = new JsonStore(config.dataFile)
   });
 
   app.use((error, request, response, _next) => {
-    if (request.file?.path) rm(request.file.path, { force: true }).catch(() => undefined);
+    const temporaryFiles = request.file
+      ? [request.file]
+      : request.files && !Array.isArray(request.files)
+        ? Object.values(request.files).flat()
+        : Array.isArray(request.files)
+          ? request.files
+          : [];
+    for (const file of temporaryFiles) {
+      if (file?.path) rm(file.path, { force: true }).catch(() => undefined);
+    }
 
     let normalized = error;
     if (error instanceof multer.MulterError) {

@@ -152,17 +152,43 @@ describe('API de la rifa dinamica', () => {
     assert.equal(reused.status, 201);
   });
 
-  it('acepta una imagen valida y rechaza contenido que solo finge ser PNG', async () => {
+  it('acepta hasta tres imagenes por premio, permite quitar una y rechaza contenido falso', async () => {
     const validPng = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=', 'base64');
     const validForm = new FormData();
     validForm.append('name', 'Premio con imagen');
     validForm.append('description', 'Imagen de prueba');
-    validForm.append('image', new Blob([validPng], { type: 'image/png' }), 'premio.png');
+    for (let index = 1; index <= 3; index += 1) {
+      validForm.append('images', new Blob([validPng], { type: 'image/png' }), `premio-${index}.png`);
+    }
     const created = await fetch(`${baseUrl}/api/admin/prizes`, {
       method: 'POST', headers: { Cookie: cookie, 'X-Rifa-Admin': '1' }, body: validForm,
     });
     assert.equal(created.status, 201);
-    assert.match((await created.json()).prize.imageUrl, /^\/uploads\/[a-f0-9-]+\.png$/);
+    const createdPrize = (await created.json()).prize;
+    assert.equal(createdPrize.imageUrls.length, 3);
+    createdPrize.imageUrls.forEach((imageUrl) => assert.match(imageUrl, /^\/uploads\/[a-f0-9-]+\.png$/));
+
+    const filename = createdPrize.imageUrls[1].split('/').pop();
+    const removed = await fetch(`${baseUrl}/api/admin/prizes/${encodeURIComponent(createdPrize.id)}/images/${encodeURIComponent(filename)}`, {
+      method: 'DELETE', headers: { Cookie: cookie, 'X-Rifa-Admin': '1' },
+    });
+    assert.equal(removed.status, 200);
+    assert.equal((await removed.json()).prize.imageUrls.length, 2);
+
+    const publicPrize = (await (await fetch(`${baseUrl}/api/public`)).json()).prizes.find((prize) => prize.id === createdPrize.id);
+    assert.equal(publicPrize.imageUrls.length, 2);
+    assert.equal('imageUrl' in publicPrize, false);
+
+    const tooManyForm = new FormData();
+    tooManyForm.append('name', 'Demasiadas imagenes');
+    tooManyForm.append('description', 'Debe rechazarse');
+    for (let index = 1; index <= 4; index += 1) {
+      tooManyForm.append('images', new Blob([validPng], { type: 'image/png' }), `extra-${index}.png`);
+    }
+    const tooMany = await fetch(`${baseUrl}/api/admin/prizes`, {
+      method: 'POST', headers: { Cookie: cookie, 'X-Rifa-Admin': '1' }, body: tooManyForm,
+    });
+    assert.equal(tooMany.status, 400);
 
     const fakeForm = new FormData();
     fakeForm.append('name', 'Archivo falso');

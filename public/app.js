@@ -236,14 +236,22 @@ function renderPrizes() {
     article.className = 'prize-card';
     const media = document.createElement('div');
     media.className = 'prize-media';
-    if (prize.imageUrl) {
-      const image = document.createElement('img');
-      image.src = prize.imageUrl;
-      image.alt = prize.name;
-      image.loading = index === 0 ? 'eager' : 'lazy';
-      image.width = 720;
-      image.height = 480;
-      media.append(image);
+    const imageUrls = Array.isArray(prize.imageUrls)
+      ? prize.imageUrls
+      : prize.imageUrl
+        ? [prize.imageUrl]
+        : [];
+    if (imageUrls.length > 0) {
+      media.classList.add(`has-${imageUrls.length}-images`);
+      imageUrls.forEach((imageUrl, imageIndex) => {
+        const image = document.createElement('img');
+        image.src = imageUrl;
+        image.alt = `${prize.name}, imagen ${imageIndex + 1} de ${imageUrls.length}`;
+        image.loading = index === 0 && imageIndex === 0 ? 'eager' : 'lazy';
+        image.width = 720;
+        image.height = 480;
+        media.append(image);
+      });
     } else {
       media.classList.add('prize-placeholder');
       media.append(

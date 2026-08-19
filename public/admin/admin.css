@@ -189,11 +189,23 @@
 
 .admin-prize-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 0.75rem; }
 .admin-prize-card { display: grid; overflow: hidden; border: 1px solid var(--admin-line); border-radius: var(--admin-radius); background: var(--admin-card); box-shadow: 0 0.4rem 1.4rem rgb(23 43 77 / 4%); }
-.admin-prize-image { display: grid; overflow: hidden; aspect-ratio: 3 / 1.45; place-items: center; background: #e9eff8; color: var(--admin-muted); font-size: 0.7rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
-.admin-prize-image img { width: 100%; height: 100%; object-fit: cover; }
+.admin-prize-image { display: grid; overflow: hidden; aspect-ratio: 3 / 1.45; place-items: center; background: #e9eff8; color: var(--admin-muted); font-size: 0.7rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; gap: 2px; }
+.admin-prize-image.has-2-images { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.admin-prize-image.has-3-images { grid-template: repeat(2, minmax(0, 1fr)) / minmax(0, 1.65fr) minmax(0, 1fr); }
+.admin-prize-image.has-3-images img:first-child { grid-row: 1 / -1; }
+.admin-prize-image img { width: 100%; height: 100%; min-width: 0; min-height: 0; object-fit: cover; }
 .admin-prize-copy { padding: 0.95rem 1rem; }
 .admin-prize-copy h3 { margin-block-end: 0.3rem; }
 .admin-prize-copy p { min-height: 2.7em; margin-block-end: 0.85rem; color: var(--admin-muted); font-size: 0.8rem; line-height: 1.35; }
+.admin-prize-image-count { display: block; margin: -0.25rem 0 0.8rem; color: var(--admin-muted); font-size: 0.7rem; font-weight: 750; }
+.prize-image-manager { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.55rem; }
+.admin-field > .prize-image-manager { font-size: inherit; font-weight: inherit; }
+.prize-image-manager-item { position: relative; display: block; overflow: hidden; aspect-ratio: 4 / 3; border: 1px solid var(--admin-line); border-radius: 0.65rem; background: #e9eff8; }
+.prize-image-manager-item img { width: 100%; height: 100%; object-fit: cover; }
+.prize-image-remove { position: absolute; top: 0.35rem; right: 0.35rem; display: grid; width: 1.8rem; min-height: 1.8rem; padding: 0; place-items: center; border: 1px solid rgb(255 255 255 / 70%); border-radius: 50%; background: rgb(12 23 43 / 82%); box-shadow: 0 0.2rem 0.6rem rgb(0 0 0 / 22%); color: white; cursor: pointer; font-size: 1.15rem; line-height: 1; }
+.prize-image-remove:hover { background: #bd2e3b; }
+.prize-image-remove:focus-visible { outline: 3px solid var(--admin-brand); outline-offset: 2px; }
+.prize-images-empty { grid-column: 1 / -1; padding: 1rem; border: 1px dashed var(--admin-line); border-radius: 0.65rem; color: var(--admin-muted); text-align: center; }
 
 .admin-ticket-toolbar { display: grid; margin-block-end: 0.9rem; padding: 0.9rem; grid-template-columns: 1fr minmax(10rem, 0.28fr); gap: 0.8rem; border: 1px solid var(--admin-line); border-radius: var(--admin-radius); background: var(--admin-card); }
 .admin-ticket-list { display: grid; gap: 0.45rem; }

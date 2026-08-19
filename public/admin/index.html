@@ -7,9 +7,9 @@
     <meta name="theme-color" content="#121d31">
     <title>Administración · Rifa</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="/styles.css?v=17">
-    <link rel="stylesheet" href="/admin/admin.css?v=4">
-    <script src="/admin/admin.js?v=4" defer></script>
+    <link rel="stylesheet" href="/styles.css?v=18">
+    <link rel="stylesheet" href="/admin/admin.css?v=5">
+    <script src="/admin/admin.js?v=5" defer></script>
   </head>
   <body class="admin-body">
     <a class="skip-link" href="#admin-main">Saltar al contenido</a>
@@ -159,9 +159,9 @@
                     <input name="name" required maxlength="100">
                   </label>
                   <label class="admin-field">
-                    <span>Imagen opcional</span>
-                    <input name="image" type="file" accept="image/png,image/jpeg,image/webp">
-                    <small>PNG, JPEG o WebP; máximo 5 MB.</small>
+                    <span>Imágenes opcionales</span>
+                    <input name="images" type="file" accept="image/png,image/jpeg,image/webp" multiple>
+                    <small>Hasta 3 imágenes PNG, JPEG o WebP; máximo 5 MB cada una.</small>
                   </label>
                 </div>
                 <label class="admin-field">
@@ -276,10 +276,14 @@
           <span>Descripción</span>
           <textarea name="description" rows="4" maxlength="500"></textarea>
         </label>
+        <div class="admin-field">
+          <span>Imágenes actuales</span>
+          <span class="prize-image-manager" id="prize-image-manager"></span>
+        </div>
         <label class="admin-field">
-          <span>Nueva imagen opcional</span>
-          <input name="image" type="file" accept="image/png,image/jpeg,image/webp">
-          <small>Si no eliges un archivo se conservará la imagen actual.</small>
+          <span>Agregar imágenes</span>
+          <input name="images" type="file" accept="image/png,image/jpeg,image/webp" multiple>
+          <small>Puedes completar la galería hasta llegar a 3 imágenes.</small>
         </label>
         <div class="form-actions">
           <button class="button button-primary" type="submit">Guardar premio</button>

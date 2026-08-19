@@ -27,19 +27,19 @@ export function createDefaultData() {
         id: 'premio-1',
         name: 'Primer premio',
         description: 'Agrega aqui la descripcion y la fotografia del premio principal.',
-        imageUrl: null,
+        imageUrls: [],
       },
       {
         id: 'premio-2',
         name: 'Segundo premio',
         description: 'Agrega aqui la descripcion y la fotografia del segundo premio.',
-        imageUrl: null,
+        imageUrls: [],
       },
       {
         id: 'premio-3',
         name: 'Tercer premio',
         description: 'Agrega aqui la descripcion y la fotografia del tercer premio.',
-        imageUrl: null,
+        imageUrls: [],
       },
     ],
     tickets: [],
@@ -67,9 +67,19 @@ export function validateData(data) {
     if (prizeIds.has(prize.id)) throw new Error(`El premio ${prize.id} esta repetido.`);
     prizeIds.add(prize.id);
     if (typeof prize.name !== 'string' || typeof prize.description !== 'string') throw new Error(`El premio ${prize.id} no es valido.`);
-    if (prize.imageUrl !== null) {
-      if (typeof prize.imageUrl !== 'string' || !prize.imageUrl.startsWith('/uploads/') || basename(prize.imageUrl) !== prize.imageUrl.slice('/uploads/'.length)) {
-        throw new Error(`La imagen de ${prize.id} no es valida.`);
+    if (prize.imageUrls !== undefined && !Array.isArray(prize.imageUrls)) {
+      throw new Error(`Las imagenes de ${prize.id} no son validas.`);
+    }
+    const imageUrls = Array.isArray(prize.imageUrls)
+      ? prize.imageUrls
+      : prize.imageUrl == null
+        ? []
+        : [prize.imageUrl];
+    if (imageUrls.length > 3) throw new Error(`El premio ${prize.id} no puede tener mas de 3 imagenes.`);
+    if (new Set(imageUrls).size !== imageUrls.length) throw new Error(`El premio ${prize.id} tiene imagenes repetidas.`);
+    for (const imageUrl of imageUrls) {
+      if (typeof imageUrl !== 'string' || !imageUrl.startsWith('/uploads/') || basename(imageUrl) !== imageUrl.slice('/uploads/'.length)) {
+        throw new Error(`Una imagen de ${prize.id} no es valida.`);
       }
     }
   }

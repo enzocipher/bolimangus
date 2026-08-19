@@ -13,6 +13,7 @@ const elements = {
   prizeList: document.querySelector('#admin-prize-list'),
   prizeDialog: document.querySelector('#prize-dialog'),
   prizeForm: document.querySelector('#prize-form'),
+  prizeImageManager: document.querySelector('#prize-image-manager'),
   ticketList: document.querySelector('#admin-ticket-list'),
   ticketSearch: document.querySelector('#admin-ticket-search'),
   ticketFilter: document.querySelector('#admin-ticket-filter'),
@@ -146,17 +147,61 @@ function prizeButton(label, className, handler) {
   return button;
 }
 
+function prizeImageUrls(prize) {
+  if (!prize) return [];
+  if (Array.isArray(prize.imageUrls)) return prize.imageUrls;
+  return prize.imageUrl ? [prize.imageUrl] : [];
+}
+
+async function removePrizeImage(prize, imageUrl) {
+  const accepted = window.confirm('¿Quitar esta imagen del premio? También se eliminará del servidor.');
+  if (!accepted) return;
+  const filename = imageUrl.split('/').pop();
+  try {
+    await api(`/api/admin/prizes/${encodeURIComponent(prize.id)}/images/${encodeURIComponent(filename)}`, { method: 'DELETE' });
+    await loadData();
+    const updatedPrize = state.data.prizes.find((item) => item.id === prize.id);
+    if (updatedPrize) renderPrizeImageManager(updatedPrize);
+    showToast('Imagen eliminada.');
+  } catch (error) {
+    showToast(error.message, true);
+  }
+}
+
+function renderPrizeImageManager(prize) {
+  elements.prizeImageManager.replaceChildren();
+  const imageUrls = prizeImageUrls(prize);
+  if (imageUrls.length === 0) {
+    elements.prizeImageManager.append(textElement('small', 'prize-images-empty', 'Este premio todavía no tiene imágenes.'));
+    return;
+  }
+  imageUrls.forEach((imageUrl, index) => {
+    const item = document.createElement('span');
+    item.className = 'prize-image-manager-item';
+    const image = document.createElement('img');
+    image.src = imageUrl;
+    image.alt = `Imagen ${index + 1} de ${prize.name}`;
+    image.width = 160;
+    image.height = 110;
+    const remove = prizeButton('×', 'prize-image-remove', () => void removePrizeImage(prize, imageUrl));
+    remove.setAttribute('aria-label', `Quitar imagen ${index + 1} de ${prize.name}`);
+    item.append(image, remove);
+    elements.prizeImageManager.append(item);
+  });
+}
+
 function openPrizeDialog(prize) {
   field(elements.prizeForm, 'prizeId').value = prize.id;
   field(elements.prizeForm, 'name').value = prize.name;
   field(elements.prizeForm, 'description').value = prize.description;
-  field(elements.prizeForm, 'image').value = '';
+  field(elements.prizeForm, 'images').value = '';
+  renderPrizeImageManager(prize);
   elements.prizeDialog.showModal();
   field(elements.prizeForm, 'name').focus();
 }
 
 async function deletePrize(prize) {
-  const accepted = window.confirm(`¿Eliminar “${prize.name}”? La imagen asociada también se eliminará del servidor.`);
+  const accepted = window.confirm(`¿Eliminar “${prize.name}”? Sus imágenes también se eliminarán del servidor.`);
   if (!accepted) return;
   try {
     await api(`/api/admin/prizes/${encodeURIComponent(prize.id)}`, { method: 'DELETE' });
@@ -180,14 +225,18 @@ function renderPrizes() {
 
     const media = document.createElement('div');
     media.className = 'admin-prize-image';
-    if (prize.imageUrl) {
-      const image = document.createElement('img');
-      image.src = prize.imageUrl;
-      image.alt = '';
-      image.loading = 'lazy';
-      image.width = 600;
-      image.height = 290;
-      media.append(image);
+    const imageUrls = prizeImageUrls(prize);
+    if (imageUrls.length > 0) {
+      media.classList.add(`has-${imageUrls.length}-images`);
+      imageUrls.forEach((imageUrl, index) => {
+        const image = document.createElement('img');
+        image.src = imageUrl;
+        image.alt = `Imagen ${index + 1} de ${prize.name}`;
+        image.loading = 'lazy';
+        image.width = 600;
+        image.height = 290;
+        media.append(image);
+      });
     } else {
       media.textContent = 'Sin imagen';
     }
@@ -203,6 +252,7 @@ function renderPrizes() {
     copy.append(
       textElement('h3', '', prize.name),
       textElement('p', '', prize.description || 'Sin descripción.'),
+      textElement('small', 'admin-prize-image-count', `${imageUrls.length} de 3 imágenes`),
       actions,
     );
     article.append(media, copy);
@@ -382,6 +432,9 @@ elements.newPrizeForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   setBusy(elements.newPrizeForm, true);
   try {
+    if (field(elements.newPrizeForm, 'images').files.length > 3) {
+      throw new Error('Selecciona como máximo 3 imágenes para el premio.');
+    }
     await api('/api/admin/prizes', {
       method: 'POST',
       body: new FormData(elements.newPrizeForm),
@@ -408,11 +461,15 @@ elements.prizeForm.addEventListener('submit', async (event) => {
         description: field(elements.prizeForm, 'description').value,
       },
     });
-    const image = field(elements.prizeForm, 'image').files[0];
-    if (image) {
+    const images = [...field(elements.prizeForm, 'images').files];
+    const prize = state.data.prizes.find((item) => item.id === prizeId);
+    if (prizeImageUrls(prize).length + images.length > 3) {
+      throw new Error('La galería de un premio puede tener como máximo 3 imágenes. Quita una antes de agregar otra.');
+    }
+    if (images.length > 0) {
       const formData = new FormData();
-      formData.append('image', image);
-      await api(`/api/admin/prizes/${encodeURIComponent(prizeId)}/image`, {
+      images.forEach((image) => formData.append('images', image));
+      await api(`/api/admin/prizes/${encodeURIComponent(prizeId)}/images`, {
         method: 'POST',
         body: formData,
       });

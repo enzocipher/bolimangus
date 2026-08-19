@@ -45,11 +45,16 @@ Ultima actualizacion: 2026-08-18
   reducido a 32-40 px y persiguiendo el puntero sin brillo, particulas, giro ni
   reaccion adicional al clic; conserva su orientacion y queda estatico en
   tactil o movimiento reducido.
+- [x] Cada premio admite hasta 3 imagenes locales: se pueden cargar juntas,
+  agregar despues y quitar individualmente desde `/admin`; la pagina publica y
+  el panel las presentan en una galeria responsive de una, dos o tres vistas.
+- [x] El formato nuevo usa `imageUrls` y mantiene compatibilidad automatica con
+  premios existentes que todavia usan el campo singular `imageUrl`.
 - [x] Se agrego un favicon SVG local con el icono de ticket para evitar la
   solicitud 404 que realizaba el navegador.
 - [x] Mart y su comprobacion llevan la firma `Doron::MartKeeper::v1`; eliminar
   el componente bloquea solamente la pagina publica y no afecta `/admin`.
-- [x] Pasan 18 pruebas automatizadas de privacidad, concurrencia, pares,
+- [x] Pasan 19 pruebas automatizadas de privacidad, concurrencia, pares,
   persistencia, pago, eliminacion, reutilizacion, autenticacion e imagenes.
 - [x] Se repitieron las 18 pruebas y la comprobacion de arranque tras restaurar
   la lista publica segura; `/api/public` no expone campos de conteo y el HTML
@@ -57,6 +62,9 @@ Ultima actualizacion: 2026-08-18
 - [x] Se repitieron las 18 pruebas y el arranque tras sustituir el SVG de Mart:
   el GIF original respondio 200 como `image/gif`, el HTML contiene la fuente y
   los creditos exactos, y la CSP solo agrego `static.wikitide.net` a `img-src`.
+- [x] Se ejecutaron las 19 pruebas y la comprobacion de arranque tras ampliar
+  los premios a tres imagenes; `/health`, `/api/public` y los recursos publicos
+  respondieron correctamente con el formato compatible `imageUrls`.
 
 ## Pendiente para publicar
 

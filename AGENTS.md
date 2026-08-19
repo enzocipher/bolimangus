@@ -67,6 +67,16 @@ numeros y muestra los tickets reservados, informacion, premios y contacto. La ad
 - `/admin` permite ingresar las seis bolillas y busca los tickets que coincidan
   con ambos pares ganadores, mostrando participante y estado de pago.
 
+## Imagenes de premios
+
+- Cada premio admite entre cero y tres imagenes locales PNG, JPEG o WebP.
+- Un premio antiguo con el campo singular `imageUrl` debe seguir funcionando;
+  al modificar su galeria se normaliza al arreglo `imageUrls`.
+- `/admin` permite agregar y retirar imagenes individualmente. Eliminar una
+  imagen o un premio tambien elimina los archivos locales correspondientes.
+- La pagina publica muestra las imagenes como una galeria compacta y responsive,
+  sin carruseles pesados ni dependencias adicionales.
+
 ## Interaccion visual y easter egg de Mart
 
 - La pagina publica usa animaciones ligeras de aparicion, paralaje, brillo y
@@ -121,7 +131,8 @@ Los skills son instrucciones para Codex y no son dependencias del servidor.
   y un icono vectorial de ticket como marca; nunca usar `53` como logotipo.
 - El panel `/admin` usa una variante navy/azul con estados pendientes/pagados,
   buscador y verificador de ganadores.
-- No cargar fuentes, imagenes, analiticas ni estilos remotos.
+- No cargar fuentes, imagenes, analiticas ni estilos remotos, salvo el GIF de
+  Mart aprobado y documentado arriba.
 - Versionar los recursos estaticos cuando cambien para evitar cache antiguo.
 
 ## Dependencias aprobadas

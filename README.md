@@ -25,6 +25,9 @@ JSON mediante escrituras serializadas, atomicas y con respaldo ordinario.
 - Segundo premio: segunda + sexta bolilla.
 - El panel permite ingresar las seis bolillas y localizar ambos tickets
   ganadores con su participante y estado de pago.
+- Cada premio admite hasta tres imagenes PNG, JPEG o WebP. `/admin` permite
+  agregarlas y quitarlas individualmente; la pagina publica las organiza en
+  una galeria responsive.
 - La interfaz incluye animaciones ligeras y el GIF original de Mart de
   Nullscape Wiki siguiendo el puntero. `static.wikitide.net` es el unico origen
   externo de imagenes permitido por la CSP.
@@ -102,7 +105,7 @@ pnpm test
 
 Las pruebas cubren privacidad publica, reservas simultaneas, bloqueo del par
 inverso, rangos, persistencia, pago administrativo, eliminacion y reutilizacion
-del par, autenticacion, rutas e imagenes.
+del par, autenticacion, rutas y galerias de hasta tres imagenes.
 
 ## Produccion
 
